@@ -1,4 +1,4 @@
-# @build-a-bot/sdk
+# Build-a-Bot
 
 Build scraper bots that convert any URLs into clean data.
 
