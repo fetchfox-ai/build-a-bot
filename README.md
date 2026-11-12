@@ -12,7 +12,7 @@ npm install @build-a-bot/sdk zod
 
 ## Example
 
-Write your first scraper like this:
+Build your first scraper bot:
 
 ```js
 import { BuildABot } from '@build-a-bot/sdk';
