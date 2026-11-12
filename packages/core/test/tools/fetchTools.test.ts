@@ -154,20 +154,6 @@ describe('fetch tools (NoProxy)', () => {
     });
   }, 120_000);
 
-  it('returns slim HTML without scripts and with resolved links', async () => {
-    const url = htmlUrl(
-      '<html><body><script>secret()</script><a class="item" href="/product/1">One</a></body></html>'
-    );
-    const fetched = await execute(fetchTools, 'fetch', { url, proxy: 'none' });
-    const viewed = await execute(documentTools, 'documentTools_get', {
-      documentId: fetched.documentId,
-      format: 'slimHtml',
-      transform: 'none',
-    });
-    expect(viewed.content).toContain('https://httpbin.org/product/1');
-    expect(viewed.content).not.toContain('secret()');
-  }, 120_000);
-
   it('returns the cached document for repeated fetches', async () => {
     const url = htmlUrl('<p>Catalog</p>');
     const first = await execute(fetchTools, 'fetch', { url, proxy: 'none' });

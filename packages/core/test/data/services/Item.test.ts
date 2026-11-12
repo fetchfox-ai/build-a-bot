@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { Item } from '../../../src/data/services/Item.js';
 
 describe('Item', () => {
-  it('copies data properties', () => {
+  it('stores data properties', () => {
     const item = new Item({ id: 'item-1' }, { name: 'Example' });
 
-    expect(item).toMatchObject({ identity: { id: 'item-1' }, name: 'Example' });
+    expect(item).toMatchObject({ identity: { id: 'item-1' }, data: { name: 'Example' } });
   });
 
   it('uses explicitly supplied citations', () => {

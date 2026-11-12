@@ -128,15 +128,15 @@ it('runs planStep with a BotTemplate', async () => {
   expect(generate).toHaveBeenCalledOnce();
   expect(generate).toHaveBeenCalledWith(
     expect.stringContaining('<class-specs>'),
-    expect.objectContaining({ maxSteps: 20 })
+    expect.objectContaining({ maxSteps: 30 })
   );
   expect(generate).toHaveBeenCalledWith(
     expect.stringContaining('<name>Math</name>'),
-    expect.objectContaining({ maxSteps: 20 })
+    expect.objectContaining({ maxSteps: 30 })
   );
   expect(generate).toHaveBeenCalledWith(
     expect.stringContaining('<name>addNumbers</name>'),
-    expect.objectContaining({ maxSteps: 20 })
+    expect.objectContaining({ maxSteps: 30 })
   );
 });
 
