@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Item } from '../../../../src/data/services/Item.js';
+import { Item } from '../../../../src/data/bots/Item.js';
 import { Run } from '../../../../src/data/services/Run.js';
 import { MemoryItemStorage } from '../../../../src/data/services/storage/MemoryItemStorage.js';
 

@@ -4,7 +4,7 @@ import { isDeepStrictEqual } from 'node:util';
 import PQueue from 'p-queue';
 import { UsesContext, type UsesContextOptions } from '../../../context/UsesContext.js';
 import { getOrNull } from '../../../util/index.js';
-import { Item } from '../Item.js';
+import { Item } from '../../bots/Item.js';
 import { Run } from '../Run.js';
 import { type HistoricalItem, type IItemStorage } from './IItemStorage.js';
 
@@ -44,7 +44,7 @@ export class FileItemStorage extends UsesContext implements IItemStorage {
     });
   }
 
-  async remove(namespace: string, identities: any[]): Promise<void> {
+  async remove(namespace: string, fingerprints: any[]): Promise<void> {
     const context = await this.context();
     await this.#pq.add(async () => {
       const itemsFilename = this.latestItemsFilename(namespace);
@@ -52,7 +52,7 @@ export class FileItemStorage extends UsesContext implements IItemStorage {
       const items = await this.readItems(itemsFilename, citationsFilename);
       const remaining = items.filter(
         (item) =>
-          !identities.some((identity) => isDeepStrictEqual(getOrNull(item, 'identity'), identity))
+          !fingerprints.some((fingerprint) => isDeepStrictEqual(getOrNull(item, 'fingerprint'), fingerprint))
       );
       context.logger.info(
         `Removing ${items.length - remaining.length} items from ${itemsFilename}`
@@ -75,7 +75,7 @@ export class FileItemStorage extends UsesContext implements IItemStorage {
     });
   }
 
-  async listHistorical(namespace: string, identity: any): Promise<HistoricalItem[]> {
+  async listHistorical(namespace: string, fingerprint: any): Promise<HistoricalItem[]> {
     return this.#pq.add(async () => {
       const dir = this.archiveDirectory(namespace);
       let filenames: string[];
@@ -100,7 +100,7 @@ export class FileItemStorage extends UsesContext implements IItemStorage {
       );
       return history
         .flat()
-        .filter(({ item }) => isDeepStrictEqual(getOrNull(item, 'identity'), identity));
+        .filter(({ item }) => isDeepStrictEqual(getOrNull(item, 'fingerprint'), fingerprint));
     });
   }
 
@@ -197,38 +197,43 @@ export class FileItemStorage extends UsesContext implements IItemStorage {
       throw new TypeError(`Item storage file contains a non-object item: ${filename}`);
     }
     const storedItem = val as Record<string, unknown>;
-    const identity = storedItem.identity;
+    const fingerprint = storedItem.fingerprint;
+    const timestamp = getOrNull<string>(storedItem, 'timestamp');
     const data = getOrNull<Record<string, unknown>>(storedItem, 'data');
     if (data === null) {
       throw new TypeError(`Item storage file contains an invalid item: ${filename}`);
     }
     const citation = citations.find((val) =>
-      isDeepStrictEqual(getOrNull(val, 'identity'), identity)
+      isDeepStrictEqual(getOrNull(val, 'fingerprint'), fingerprint)
     );
     const itemCitations =
       citation && Object.hasOwn(citation, 'citations') ? citation.citations : undefined;
-    return new Item(identity, data, itemCitations);
+    return new Item(
+      fingerprint,
+      data,
+      itemCitations,
+      timestamp === null ? undefined : new Date(timestamp)
+    );
   }
 
   private serializeItems(items: Item[], run?: Run): Record<string, unknown>[] {
     return items.map((item) => {
-      const data = { ...(item as Record<string, unknown>) };
-      const { data: itemData, hash: itemHash, identity } = data;
+      const { data: itemData, id: itemId, timestamp, fingerprint } = item;
       return run
-        ? { identity, hash: itemHash, data: itemData, run }
-        : { identity, hash: itemHash, data: itemData };
+        ? { id: itemId, timestamp, fingerprint, data: itemData, run }
+        : { id: itemId, timestamp, fingerprint, data: itemData };
     });
   }
 
   private serializeCitations(items: Item[], run?: Run): Record<string, unknown>[] {
     return items.map((item) => {
-      const data = item as Record<string, unknown>;
       const citation: Record<string, unknown> = {
-        identity: data.identity,
-        hash: data.hash,
+        id: item.id,
+        timestamp: item.timestamp,
+        fingerprint: item.fingerprint,
       };
-      if (Object.hasOwn(data, 'citations')) {
-        citation.citations = data.citations;
+      if (item.citations !== undefined) {
+        citation.citations = item.citations;
       }
       if (run) {
         citation.run = run;
@@ -252,10 +257,10 @@ export class FileItemStorage extends UsesContext implements IItemStorage {
 
   private serializeDelimited(vals: Record<string, unknown>[], delimiter: string): string {
     const headers = [...new Set(vals.flatMap((val) => Object.keys(val)))];
-    const identityIndex = headers.indexOf('identity');
-    if (identityIndex > 0) {
-      headers.splice(identityIndex, 1);
-      headers.unshift('identity');
+    const idIndex = headers.indexOf('id');
+    if (idIndex > 0) {
+      headers.splice(idIndex, 1);
+      headers.unshift('id');
     }
     return [
       headers,

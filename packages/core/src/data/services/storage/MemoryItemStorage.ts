@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from 'node:util';
 import { getOrNull } from '../../../util/index.js';
-import { Item } from '../Item.js';
+import { Item } from '../../bots/Item.js';
 import { Run } from '../Run.js';
 import { type HistoricalItem, type IItemStorage } from './IItemStorage.js';
 
@@ -16,13 +16,13 @@ export class MemoryItemStorage implements IItemStorage {
     history.push(...items.map((item) => ({ item, run })));
     this.#history.set(namespace, history);
   }
-  async remove(namespace: string, identities: any[]): Promise<void> {
+  async remove(namespace: string, fingerprints: any[]): Promise<void> {
     const items = this.#items.get(namespace) ?? [];
     this.#items.set(
       namespace,
       items.filter(
         (item) =>
-          !identities.some((identity) => isDeepStrictEqual(getOrNull(item, 'identity'), identity))
+          !fingerprints.some((fingerprint) => isDeepStrictEqual(getOrNull(item, 'fingerprint'), fingerprint))
       )
     );
   }
@@ -33,9 +33,9 @@ export class MemoryItemStorage implements IItemStorage {
     const items = this.#items.get(namespace) ?? [];
     return limit === undefined ? items.slice(offset) : items.slice(offset, offset + limit);
   }
-  async listHistorical(namespace: string, identity: any): Promise<HistoricalItem[]> {
+  async listHistorical(namespace: string, fingerprint: any): Promise<HistoricalItem[]> {
     return (this.#history.get(namespace) ?? []).filter(({ item }) =>
-      isDeepStrictEqual(getOrNull(item, 'identity'), identity)
+      isDeepStrictEqual(getOrNull(item, 'fingerprint'), fingerprint)
     );
   }
 }

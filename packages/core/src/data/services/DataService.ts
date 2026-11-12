@@ -2,7 +2,7 @@ import PQueue from 'p-queue';
 import { UsesContext, type UsesContextOptions } from '../../context/UsesContext.js';
 import { DataBot, type DataBotOptions } from '../bots/DataBot.js';
 import { DataSource } from '../bots/DataSource.js';
-import { Item } from './Item.js';
+import { Item } from '../bots/Item.js';
 import { BotNotBuiltError } from './errors.js';
 import { Run } from './Run.js';
 
@@ -53,11 +53,7 @@ export class DataService extends UsesContext {
         console.log('sync source:', source);
         const out = await this.bot.extract({ urls: [source.url] });
         console.log('sync gave:', out);
-        for (let i = 0; i < out.items.length; i++) {
-          items.push(
-            new Item(await this.bot.identity(out.items[i]), out.items[i], out.citations[i])
-          );
-        }
+        items.push(...out);
       }
     });
 

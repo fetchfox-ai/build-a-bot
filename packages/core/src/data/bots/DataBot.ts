@@ -2,16 +2,15 @@ import { z } from 'zod';
 import { Bot, type BotResult } from '../../bots/Bot.js';
 import { type VmContextOptions } from '../../bots/VmContextOptions.js';
 import { type UsesContextOptions } from '../../context/UsesContext.js';
+import { Item } from './Item.js';
 import { DataBotTemplate } from './DataBotTemplate.js';
 import type { DataSource, DataSourceOptions } from './DataSource.js';
 
 type ExtractSpec = DataBotTemplate['extractClassSpec']['functionSpecs'][number];
 type ExtractInput = z.input<ExtractSpec['inputSchema']>;
-type ExtractResult = BotResult<z.output<ExtractSpec['outputSchema']>>;
-
-type IdentitySpec = DataBotTemplate['identityClassSpec']['functionSpecs'][number];
-type IdentityInput = z.input<IdentitySpec['inputSchema']>;
-type IdentityResult = BotResult<z.output<IdentitySpec['outputSchema']>>;
+type FingerprintSpec = DataBotTemplate['fingerprintClassSpec']['functionSpecs'][number];
+type FingerprintInput = z.input<FingerprintSpec['inputSchema']>;
+type FingerprintResult = BotResult<z.output<FingerprintSpec['outputSchema']>>;
 
 export type DataBotOptions = UsesContextOptions & {
   id?: string;
@@ -19,7 +18,7 @@ export type DataBotOptions = UsesContextOptions & {
   vmContext?: VmContextOptions;
   sources: (DataSource | DataSourceOptions)[];
   itemSchema: z.ZodType;
-  identitySchema?: z.ZodType;
+  fingerprintSchema?: z.ZodType;
 };
 
 export class DataBot extends Bot {
@@ -28,7 +27,7 @@ export class DataBot extends Bot {
       vmContext: options.vmContext,
       sources: options.sources,
       itemSchema: options.itemSchema,
-      identitySchema: options.identitySchema,
+      fingerprintSchema: options.fingerprintSchema,
       context: options.context,
     });
     super({
@@ -39,11 +38,17 @@ export class DataBot extends Bot {
     });
   }
 
-  extract(input: ExtractInput): Promise<ExtractResult> {
-    return this.run('Extract', 'extract', input) as Promise<ExtractResult>;
+  async extract(input: ExtractInput): Promise<Item[]> {
+    const extractedItems = (await this.run('Extract', 'extract', input)) as z.output<
+      ExtractSpec['outputSchema']
+    >;
+    return extractedItems.map(
+      ({ timestamp, fingerprint, data, citations }) =>
+        new Item(fingerprint, data, citations, new Date(timestamp))
+    );
   }
 
-  identity(input: IdentityInput): Promise<IdentityResult> {
-    return this.run('Identity', 'identity', input) as Promise<IdentityResult>;
+  fingerprint(input: FingerprintInput): Promise<FingerprintResult> {
+    return this.run('Fingerprint', 'fingerprint', input) as Promise<FingerprintResult>;
   }
 }

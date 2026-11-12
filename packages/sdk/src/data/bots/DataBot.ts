@@ -15,7 +15,7 @@ export class DataBot extends Bot {
     return this.callFunction('extract', input);
   }
 
-  identity(input: Parameters<core.DataBot['identity']>[0]): ReturnType<core.DataBot['identity']> {
-    return this.callFunction('identity', input);
+  fingerprint(input: Parameters<core.DataBot['fingerprint']>[0]): ReturnType<core.DataBot['fingerprint']> {
+    return this.callFunction('fingerprint', input);
   }
 }

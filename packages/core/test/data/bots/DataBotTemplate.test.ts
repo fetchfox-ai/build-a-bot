@@ -1,6 +1,7 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { DataBot } from '../../../src/data/bots/DataBot.js';
+import { Item } from '../../../src/data/bots/Item.js';
 import { DataBotTemplate, toCitationsSchema } from '../../../src/data/bots/DataBotTemplate.js';
 import { DataSource } from '../../../src/data/bots/DataSource.js';
 
@@ -24,7 +25,7 @@ it('accepts source instances and URL options when creating a data bot', () => {
   ).toThrow('Invalid URL: invalid-url');
 });
 
-it('groups extraction and identity functions into class specifications', () => {
+it('groups extraction and fingerprint functions into class specifications', () => {
   const template = new DataBotTemplate({
     sources: [],
     itemSchema: z.object({ name: z.string() }),
@@ -40,10 +41,76 @@ it('groups extraction and identity functions into class specifications', () => {
     numImplementations: 'single',
     functionSpecs: [{ name: 'extract' }],
   });
-  expect(template.identityClassSpec).toMatchObject({
-    name: 'Identity',
+  expect(template.fingerprintClassSpec).toMatchObject({
+    name: 'Fingerprint',
     numImplementations: 'single',
-    functionSpecs: [{ name: 'identity' }],
+    functionSpecs: [{ name: 'fingerprint' }],
+  });
+});
+
+it('returns self-contained extracted items', () => {
+  const template = new DataBotTemplate({
+    sources: [],
+    itemSchema: z.object({ name: z.string() }),
+    fingerprintSchema: z.object({ sku: z.string() }),
+  });
+  const outputSchema = template.extractClassSpec.functionSpecs[0].outputSchema;
+
+  expect(
+    outputSchema.parse([
+      {
+        timestamp: '2026-11-12T12:00:00.000Z',
+        url: 'https://example.test/product',
+        fingerprint: { sku: 'example-product' },
+        data: { name: 'Example product' },
+        citations: {
+          name: { raw: 'Example product', sourceUrl: 'https://example.test/product' },
+        },
+      },
+    ])
+  ).toEqual([
+    {
+      timestamp: '2026-11-12T12:00:00.000Z',
+      url: 'https://example.test/product',
+      fingerprint: { sku: 'example-product' },
+      data: { name: 'Example product' },
+      citations: {
+        name: { raw: 'Example product', sourceUrl: 'https://example.test/product' },
+      },
+    },
+  ]);
+});
+
+it('converts extraction output into items', async () => {
+  const bot = new DataBot({
+    name: 'products',
+    sources: [],
+    itemSchema: z.object({ name: z.string() }),
+    fingerprintSchema: z.object({ sku: z.string() }),
+  });
+  vi.spyOn(bot, 'run').mockResolvedValue([
+    {
+      timestamp: '2026-11-12T12:00:00.000Z',
+      url: 'https://example.test/product',
+      fingerprint: { sku: 'example-product' },
+      data: { name: 'Example product' },
+      citations: {
+        name: { raw: 'Example product', sourceUrl: 'https://example.test/product' },
+      },
+    },
+  ]);
+
+  const [item] = await bot.extract({ urls: ['https://example.test/product'] });
+
+  expect(item).toBeInstanceOf(Item);
+  expect(item).toMatchObject({
+    id: expect.any(String),
+    timestamp: new Date('2026-11-12T12:00:00.000Z'),
+    fingerprint: { sku: 'example-product' },
+    data: { name: 'Example product' },
+    citations: {
+      name: { raw: 'Example product', sourceUrl: 'https://example.test/product' },
+    },
   });
 });
 

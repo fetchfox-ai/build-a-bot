@@ -10,21 +10,21 @@ export type DataBotTemplateOptions = UsesContextOptions & {
   vmContext?: VmContextOptions;
   sources: (DataSource | DataSourceOptions)[];
   itemSchema: z.ZodType;
-  identitySchema?: z.ZodType;
+  fingerprintSchema?: z.ZodType;
 };
 
 export class DataBotTemplate extends BotTemplate {
   extractPageTypeClassSpec;
   extractClassSpec;
-  identityClassSpec;
+  fingerprintClassSpec;
 
   constructor(options: DataBotTemplateOptions) {
     const sources = options.sources.map((source) =>
       source instanceof DataSource ? source : new DataSource(source)
     );
     const itemSchema = options.itemSchema;
-    const identitySchema =
-      options.identitySchema ??
+    const fingerprintSchema =
+      options.fingerprintSchema ??
       z
         .object({})
         .passthrough()
@@ -51,27 +51,26 @@ Write a separate implementation for eaech page type you see. This includes both 
         urls: z.array(z.string()).describe('URLs to extract data from'),
         limit: z.number().optional().describe('The maximum number of items to extract'),
       }),
-      outputSchema: z.object({
-        items: z.array(itemSchema),
-        citations: z
-          .array(
-            toCitationsSchema(itemSchema).describe(
-              'Give the raw, unprocessed source data for each field, and the URL describing where you found it.'
-            )
-          )
-          .describe(
-            'Position in citations array corresponds to item in same position in items array'
+      outputSchema: z.array(
+        z.object({
+          timestamp: z.string().datetime().describe('The ISO 8601 time when this item was extracted'),
+          url: z.string().url().describe('The source URL for this item'),
+          fingerprint: fingerprintSchema,
+          data: itemSchema,
+          citations: toCitationsSchema(itemSchema).describe(
+            'Give the raw, unprocessed source data for each field, and the URL describing where you found it.'
           ),
-      }),
+        })
+      ),
       sampleInputs: sources.map((source) => ({ urls: [source.url] })),
     });
 
-    const identitySpec = new FunctionSpec({
-      name: 'identity',
-      description: `Take items in the specified item schema: ${JSON.stringify(itemSchema)}, and convert them into the identity schema: ${JSON.stringify(identitySchema)}`,
-      prompt: `This function takes an item, and converts it into an identity object. The item was original derived from a web URL. The goal of the identity object is to identify the item in a unique but stable fashion across multiple extractions from the original URL. Thus, it should normalize and stabilize fields as appropriate, using judgement on what is a good value to put into the identity object. The identity object will later be hashed to generate the unique identifier string.`,
+    const fingerprintSpec = new FunctionSpec({
+      name: 'fingerprint',
+      description: `Take items in the specified item schema: ${JSON.stringify(itemSchema)}, and convert them into the fingerprint schema: ${JSON.stringify(fingerprintSchema)}`,
+      prompt: `This function takes an item, and converts it into a fingerprint object. The item was original derived from a web URL. The goal of the fingerprint object is to identify the item in a unique but stable fashion across multiple extractions from the original URL. Thus, it should normalize and stabilize fields as appropriate, using judgement on what is a good value to put into the fingerprint object. The fingerprint object will later be hashed to generate the unique identifier string.`,
       inputSchema: itemSchema,
-      outputSchema: identitySchema,
+      outputSchema: fingerprintSchema,
       sampleInputs: [],
     });
 
@@ -94,21 +93,21 @@ Write a separate implementation for eaech page type you see. This includes both 
       functionSpecs: [extractSpec],
     });
 
-    const identityClassSpec = new ClassSpec({
-      name: 'Identity',
+    const fingerprintClassSpec = new ClassSpec({
+      name: 'Fingerprint',
       numImplementations: 'single',
-      description: 'Builds stable identity objects for extracted items.',
-      prompt: 'Implement identity generation for extracted items.',
-      functionSpecs: [identitySpec],
+      description: 'Builds stable fingerprint objects for extracted items.',
+      prompt: 'Implement fingerprint generation for extracted items.',
+      functionSpecs: [fingerprintSpec],
     });
 
     super({
       ...options,
-      classSpecs: [extractPageTypeClassSpec, extractClassSpec, identityClassSpec],
+      classSpecs: [extractPageTypeClassSpec, extractClassSpec, fingerprintClassSpec],
     });
     this.extractPageTypeClassSpec = extractPageTypeClassSpec;
     this.extractClassSpec = extractClassSpec;
-    this.identityClassSpec = identityClassSpec;
+    this.fingerprintClassSpec = fingerprintClassSpec;
   }
 }
 

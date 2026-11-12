@@ -2,7 +2,7 @@ import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { Item } from '../../../../src/data/services/Item.js';
+import { Item } from '../../../../src/data/bots/Item.js';
 import { Run } from '../../../../src/data/services/Run.js';
 import { FileItemStorage } from '../../../../src/data/services/storage/FileItemStorage.js';
 import { getOrNull } from '../../../../src/util/index.js';
@@ -36,7 +36,8 @@ describe('FileItemStorage', () => {
   it('writes live items and a run snapshot in the namespace directory', async () => {
     const storage = new FileItemStorage({ directory, format: 'jsonl' });
     const citations = [{ url: 'https://example.com' }];
-    const item = new Item({ id: 'item-1' }, { name: 'Example' }, citations);
+    const timestamp = new Date('2026-11-09T12:00:00.000Z');
+    const item = new Item({ id: 'item-1' }, { name: 'Example' }, citations, timestamp);
     const run = createRun('2026-11-09T12:00:01.000Z');
 
     await storage.add('first', run, [item]);
@@ -45,13 +46,20 @@ describe('FileItemStorage', () => {
     expect(await storage.list('first', {})).toMatchObject([item]);
     const items = await readJsonl(join(namespaceDirectory, 'items-latest.jsonl'));
     const storedCitations = await readJsonl(join(namespaceDirectory, 'citations-latest.jsonl'));
-    const itemHash = getOrNull<string>(item, 'hash');
+    const itemId = getOrNull<string>(item, 'id');
     expect(items).toEqual([
-      { data: { name: 'Example' }, hash: itemHash, identity: { id: 'item-1' } },
+      {
+        id: itemId,
+        timestamp: timestamp.toJSON(),
+        fingerprint: { id: 'item-1' },
+        data: { name: 'Example' },
+      },
     ]);
-    expect(storedCitations).toEqual([{ citations, hash: itemHash, identity: { id: 'item-1' } }]);
-    expect(Object.keys(items[0])).toEqual(['identity', 'hash', 'data']);
-    expect(Object.keys(storedCitations[0])).toEqual(['identity', 'hash', 'citations']);
+    expect(storedCitations).toEqual([
+      { id: itemId, timestamp: timestamp.toJSON(), fingerprint: { id: 'item-1' }, citations },
+    ]);
+    expect(Object.keys(items[0])).toEqual(['id', 'timestamp', 'fingerprint', 'data']);
+    expect(Object.keys(storedCitations[0])).toEqual(['id', 'timestamp', 'fingerprint', 'citations']);
     expect((await readdir(namespaceDirectory)).sort()).toEqual([
       'archive',
       'citations-latest.jsonl',
