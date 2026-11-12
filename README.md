@@ -19,10 +19,13 @@ import { BuildABot } from '@build-a-bot/sdk';
 import { z } from 'zod';
 
 const client = new BuildABot({
-  apiKey: 'ffk_...',
+  apiKey: 'ffk_your_api_key',
 });
 
+
+// Pick an example URL for the scraper bot.
 const url = 'https://pokemondb.net/pokedex/bulbasaur';
+
 // The first build may take a few minutes. After that, Build-A-Bot reuses
 // the saved scraper bot.
 const bot = await client.data.bots.build({
@@ -36,8 +39,10 @@ const bot = await client.data.bots.build({
   }),
 });
 
+// The bot works on URLs similar to your example.
 const result = await bot.extract({
   urls: ['https://pokemondb.net/pokedex/pikachu'],
 });
+
 console.log(result.items);
 ```
