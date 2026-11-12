@@ -4,11 +4,11 @@ import { ClassSpec } from '../../bots/ClassSpec.js';
 import { FunctionSpec } from '../../bots/FunctionSpec.js';
 import { type VmContextOptions } from '../../bots/VmContextOptions.js';
 import { type UsesContextOptions } from '../../context/UsesContext.js';
-import { DataSource } from './DataSource.js';
+import { DataSource, type DataSourceOptions } from './DataSource.js';
 
 export type DataBotTemplateOptions = UsesContextOptions & {
   vmContext?: VmContextOptions;
-  sources: DataSource[];
+  sources: (DataSource | DataSourceOptions)[];
   itemSchema: z.ZodType;
   identitySchema?: z.ZodType;
 };
@@ -19,6 +19,9 @@ export class DataBotTemplate extends BotTemplate {
   identityClassSpec;
 
   constructor(options: DataBotTemplateOptions) {
+    const sources = options.sources.map((source) =>
+      source instanceof DataSource ? source : new DataSource(source)
+    );
     const itemSchema = options.itemSchema;
     const identitySchema =
       options.identitySchema ??
@@ -60,7 +63,7 @@ Write a separate implementation for eaech page type you see. This includes both 
             'Position in citations array corresponds to item in same position in items array'
           ),
       }),
-      sampleInputs: options.sources.map((it) => ({ urls: [it.url] })),
+      sampleInputs: sources.map((source) => ({ urls: [source.url] })),
     });
 
     const identitySpec = new FunctionSpec({

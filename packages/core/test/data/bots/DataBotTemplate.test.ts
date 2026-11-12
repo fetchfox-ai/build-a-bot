@@ -1,6 +1,28 @@
 import { expect, it } from 'vitest';
 import { z } from 'zod';
+import { DataBot } from '../../../src/data/bots/DataBot.js';
 import { DataBotTemplate, toCitationsSchema } from '../../../src/data/bots/DataBotTemplate.js';
+import { DataSource } from '../../../src/data/bots/DataSource.js';
+
+it('accepts source instances and URL options when creating a data bot', () => {
+  const bot = new DataBot({
+    name: 'products',
+    sources: [new DataSource({ url: 'https://example.test/one' }), { url: 'https://example.test/two' }],
+    itemSchema: z.object({ name: z.string() }),
+  });
+
+  expect((bot.template as DataBotTemplate).extractClassSpec.functionSpecs[0].sampleInputs).toEqual([
+    { urls: ['https://example.test/one'] },
+    { urls: ['https://example.test/two'] },
+  ]);
+  expect(
+    () =>
+      new DataBotTemplate({
+        sources: [{ url: 'invalid-url' }],
+        itemSchema: z.object({ name: z.string() }),
+      })
+  ).toThrow('Invalid URL: invalid-url');
+});
 
 it('groups extraction and identity functions into class specifications', () => {
   const template = new DataBotTemplate({

@@ -3,7 +3,7 @@ import { Bot, type BotResult } from '../../bots/Bot.js';
 import { type VmContextOptions } from '../../bots/VmContextOptions.js';
 import { type UsesContextOptions } from '../../context/UsesContext.js';
 import { DataBotTemplate } from './DataBotTemplate.js';
-import { DataSource } from './DataSource.js';
+import type { DataSource, DataSourceOptions } from './DataSource.js';
 
 type ExtractSpec = DataBotTemplate['extractClassSpec']['functionSpecs'][number];
 type ExtractInput = z.input<ExtractSpec['inputSchema']>;
@@ -17,7 +17,7 @@ export type DataBotOptions = UsesContextOptions & {
   id?: string;
   name: string;
   vmContext?: VmContextOptions;
-  sources: DataSource[];
+  sources: (DataSource | DataSourceOptions)[];
   itemSchema: z.ZodType;
   identitySchema?: z.ZodType;
 };

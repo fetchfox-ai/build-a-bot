@@ -19,7 +19,9 @@ export class DataService extends UsesContext {
     super(options);
     this.name = options.name;
     this.bot = new DataBot(options);
-    this.sources = options.sources;
+    this.sources = options.sources.map((source) =>
+      source instanceof DataSource ? source : new DataSource(source)
+    );
   }
 
   // TODO: options should include:

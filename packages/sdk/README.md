@@ -1,0 +1,43 @@
+# @build-a-bot/sdk
+
+Build scraper bots that convert any URLs into clean data.
+
+Get an API key at https://bab.fetchfox.ai
+
+## Install
+
+```sh
+npm install @build-a-bot/sdk zod
+```
+
+## Example
+
+Write your first scraper like this:
+
+```js
+import { BuildABot } from '@build-a-bot/sdk';
+import { z } from 'zod';
+
+const client = new BuildABot({
+  apiKey: 'ffk_...',
+});
+
+const url = 'https://pokemondb.net/pokedex/bulbasaur';
+// The first build may take a few minutes. After that, Build-A-Bot reuses
+// the saved scraper bot.
+const bot = await client.data.bots.build({
+  name: 'pokemon-pokedex',
+  sources: [{ url }],
+  itemSchema: z.object({
+    name: z.string(),
+    number: z.string(),
+    hp: z.number(),
+    attack: z.number(),
+  }),
+});
+
+const result = await bot.extract({
+  urls: ['https://pokemondb.net/pokedex/pikachu'],
+});
+console.log(result.items);
+```
