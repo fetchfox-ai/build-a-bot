@@ -16,3 +16,4 @@ mastra.duckdb*
 .terraform/
 tmp/
 build-a-bot/
+ignore/
