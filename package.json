@@ -1,0 +1,25 @@
+{
+  "name": "build-a-bot",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/core",
+    "packages/sdk"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "build": "npm run build --workspace=@build-a-bot/core && npm run build --workspace=@build-a-bot/sdk",
+    "test": "npm run test --workspace=@build-a-bot/core",
+    "typecheck": "npm run typecheck --workspace=@build-a-bot/core"
+  },
+  "devDependencies": {
+    "@types/js-beautify": "^1.14.3",
+    "@types/node": "^22.15.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4"
+  }
+}

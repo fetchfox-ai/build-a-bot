@@ -1,0 +1,29 @@
+import { type Tool } from '@mastra/core/tools';
+import * as z from 'zod';
+import type { Logger } from '../../logger.js';
+import { addMetric, instrumentOutputSchema } from './shared.js';
+
+export const runtimeInstrument = async (tool: Tool, logger: Logger): Promise<Tool> => {
+  if (tool.outputSchema === undefined || tool.outputSchema == null) {
+    return tool;
+  }
+
+  const runtimeOutputSchema = instrumentOutputSchema(
+    tool.outputSchema,
+    z.object({ runtime: z.number().describe('Runtime of this tool, in milliseconds.') })
+  );
+
+  return {
+    ...tool,
+    outputSchema: runtimeOutputSchema,
+    execute: async (input, context) => {
+      const start = new Date().getTime();
+      let output;
+      if (tool.execute) {
+        output = await tool.execute(input, context);
+      }
+      const runtime = new Date().getTime() - start;
+      return addMetric(output, 'runtime', runtime, tool, logger, context);
+    },
+  };
+};

@@ -1,0 +1,2 @@
+- Always import core using `* as core` import.
+- Use `UsesClient` for SDK objects and options that take a client.
