@@ -49,7 +49,7 @@ console.log(items[0]);
 //   fingerprint: { number: '0025' },
 //   data: { name: 'Pikachu', number: '0025', hp: 35, attack: 55 },
 //   citations: {
-//     name: { raw: '<a ...>Pikachu</a>', sourceUrl: 'https://pokemondb.net/pokedex/pikachu' },
+//     name: { raw: '<a ...>Pikachu</a>', sourceUrl: 'https://...' },
 //     // Citations for number, hp, and attack follow the same shape.
 //   },
 // }
