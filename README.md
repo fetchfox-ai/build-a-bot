@@ -18,10 +18,8 @@ Build your first scraper bot:
 import { BuildABot } from '@build-a-bot/sdk';
 import { z } from 'zod';
 
-const client = new BuildABot({
-  apiKey: 'ffk_your_api_key',
-});
-
+// Get an API key from https://bab.fetchfox.ai
+const client = new BuildABot({ apiKey: 'ffk_your_api_key' });
 
 // Pick an example URL for the scraper bot.
 const url = 'https://pokemondb.net/pokedex/bulbasaur';
