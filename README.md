@@ -37,9 +37,6 @@ const bot = await client.data.bots.build({
     hp: z.number(),
     attack: z.number(),
   }),
-  fingerprintSchema: z.object({
-    number: z.string(),
-  }),
 });
 
 // The bot works on URLs similar to your example.
