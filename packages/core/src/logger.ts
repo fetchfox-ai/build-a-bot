@@ -44,7 +44,7 @@ export class Logger extends TsLogger<Record<string, unknown>> {
         {
           format: 'pretty',
           write: (record, line) => {
-            const source = record._logMeta.path?.filePathWithLine;
+            const source = record._logMeta.path?.filePathWithLine?.replace(/^.*[/\\]src[/\\]/u, '');
             process.stdout.write(`${line}${source == null ? '' : `\t${source}`}\n`);
           },
         },

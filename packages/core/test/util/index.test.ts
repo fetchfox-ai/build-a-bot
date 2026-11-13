@@ -74,5 +74,6 @@ describe('formatToolCall', () => {
 
     expect(plain(formatted)).toHaveLength('bot_run_extract '.length + 190);
     expect(plain(formatted)).toMatch(/\.\.\.$/u);
+    expect(formatted).toMatch(/\u001B\[0m$/u);
   });
 });

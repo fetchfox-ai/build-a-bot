@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { formatWithOptions } from 'node:util';
 import * as vm from 'node:vm';
-import type { TracingEvent } from '@mastra/core/observability';
+import { TracingEventType, type TracingEvent } from '@mastra/core/observability';
 import { RequestContext } from '@mastra/core/request-context';
 import { createTool } from '@mastra/core/tools';
 import chalk from 'chalk';
@@ -34,8 +34,8 @@ type BuildEventError = {
 
 export type BuildEvent = ToolBuildEvent | InferenceBuildEvent;
 
-type BaseBuildEvent = {
-  type: string;
+type BaseBuildEvent<T extends string> = {
+  type: T;
   input: any;
   output: any;
   error?: BuildEventError;
@@ -43,12 +43,12 @@ type BaseBuildEvent = {
   endTime?: Date;
 };
 
-export type ToolBuildEvent = BaseBuildEvent & {
+export type ToolBuildEvent = BaseBuildEvent<'toolCallStarted' | 'toolCallCompleted'> & {
   toolName?: string;
   toolDescription?: string;
 };
 
-export type InferenceBuildEvent = BaseBuildEvent;
+export type InferenceBuildEvent = BaseBuildEvent<'inferenceStarted' | 'inferenceCompleted'>;
 
 export type BotBuildOptions = {
   forceRebuild?: boolean;
@@ -168,18 +168,28 @@ export class Bot extends UsesContext {
 
         const traceId = srid(32, { hex: true });
         const handler = (event: TracingEvent) => {
-          if (!options.onBuildProgress || event.exportedSpan.traceId !== traceId) {
+          if (
+            !options.onBuildProgress ||
+            event.exportedSpan.traceId !== traceId ||
+            event.type === TracingEventType.SPAN_UPDATED
+          ) {
             return;
           }
 
           const spanType = event.exportedSpan?.type || '';
-          let type;
+          let type: BuildEvent['type'] | null;
           switch (spanType) {
             case 'model_inference':
-              type = 'inference';
+              type =
+                event.type === TracingEventType.SPAN_STARTED
+                  ? 'inferenceStarted'
+                  : 'inferenceCompleted';
               break;
             case 'tool_call':
-              type = 'toolCall';
+              type =
+                event.type === TracingEventType.SPAN_STARTED
+                  ? 'toolCallStarted'
+                  : 'toolCallCompleted';
               break;
             default:
               type = null;
@@ -203,7 +213,7 @@ export class Bot extends UsesContext {
               : undefined,
           };
 
-          if (type == 'toolCall') {
+          if (spanType === 'tool_call') {
             options.onBuildProgress({
               ...base,
               toolName: event.exportedSpan?.entityName,

@@ -278,10 +278,12 @@ it('forwards only progress from its own workflow trace and reports lifecycle cal
     expect(tracingOptions.traceId).toMatch(/^[a-f0-9]{32}$/);
     for (const traceId of ['another-build', tracingOptions.traceId]) {
       for (const type of ['model_inference', 'tool_call']) {
-        context.emit('trace', {
-          type: 'span_ended',
-          exportedSpan: { traceId, type, input: { traceId }, output: 'result', entityName: 'tool' },
-        });
+        for (const phase of ['span_started', 'span_updated', 'span_ended']) {
+          context.emit('trace', {
+            type: phase,
+            exportedSpan: { traceId, type, input: { traceId }, output: 'result', entityName: 'tool' },
+          });
+        }
       }
     }
     return { status: 'success', result: { code } };
@@ -292,8 +294,10 @@ it('forwards only progress from its own workflow trace and reports lifecycle cal
   const bot = new Bot({ name: 'echo', template, context });
   await bot.build({ forceRebuild: true, onBuildProgress, onBuildComplete, onBuildFinally });
   expect(onBuildProgress.mock.calls.map(([event]) => event.type)).toEqual([
-    'inference',
-    'toolCall',
+    'inferenceStarted',
+    'inferenceCompleted',
+    'toolCallStarted',
+    'toolCallCompleted',
   ]);
   expect(
     onBuildProgress.mock.calls.every(([event]) => event.input.traceId !== 'another-build')

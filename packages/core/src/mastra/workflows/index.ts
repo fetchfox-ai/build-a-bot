@@ -50,7 +50,6 @@ ${guidelines}
     const plan = resp.text;
 
     logger.debug(`Generated report: ${plan}`);
-    logger.info(`Generated report: ${plan}`);
 
     return {
       botTemplate: inputData.botTemplate,
@@ -87,15 +86,11 @@ ${codingGuidelines}
 ${guidelines}
 `;
 
-    console.log('Prompt:', prompt);
-
     const agent = mastra!.getAgentById('writing-agent');
     const resp = await agent.generate(prompt, {
       maxSteps: 20,
     });
     const code = resp.text;
-
-    console.log('Bot code:', code);
 
     return {
       botTemplate: inputData.botTemplate,

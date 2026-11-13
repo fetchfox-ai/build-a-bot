@@ -77,7 +77,7 @@ export function norm(input: string | string[]): string | string[] {
 
 export const clip = (val: unknown, max = 500): string => {
   const text = typeof val === 'string' ? val : JSON.stringify(val) || '';
-  return text.length <= max ? text : `${text.slice(0, max - 3)}...`;
+  return text.length <= max ? text : `${text.slice(0, max - 3)}...\u001B[0m`;
 };
 
 const formatToolArgs = (val: unknown, ancestors: Set<object>): string => {
