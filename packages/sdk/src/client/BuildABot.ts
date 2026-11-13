@@ -1,4 +1,4 @@
-import { Logger, type ILogger } from '@build-a-bot/core';
+import * as core from '@build-a-bot/core';
 import { defaultHost } from '../constants.js';
 import { DataBot, type DataBotOptions } from '../data/bots/DataBot.js';
 import { User } from '../user/User.js';
@@ -8,7 +8,7 @@ import type { UsesClient } from './UsesClient.js';
 export type BuildABotOptions = {
   apiKey: string;
   host?: string;
-  logger?: ILogger;
+  logger?: core.ILogger;
 };
 
 type DataBotsOptions = UsesClient;
@@ -36,9 +36,10 @@ class DataBots {
     this.client = options.client;
   }
 
-  async build(options: Omit<DataBotOptions, 'client'>): Promise<DataBot> {
+  async build(options: Omit<DataBotOptions, 'client'> & core.BotBuildOptions): Promise<DataBot> {
     const bot = new DataBot({ ...options, client: this.client });
-    await bot.build({ forceRebuild: true });
+    // TODO: handle onBuild... events
+    await bot.build({ forceRebuild: options?.forceRebuild });
     return bot;
   }
 }
@@ -46,7 +47,7 @@ class DataBots {
 export class BuildABot {
   readonly apiKey: string;
   readonly host: string;
-  readonly logger: ILogger;
+  readonly logger: core.ILogger;
   readonly ws: WebSocket;
   readonly data: { bots: DataBots };
   #user?: Promise<User>;
@@ -54,7 +55,7 @@ export class BuildABot {
   constructor(options: BuildABotOptions) {
     this.apiKey = options.apiKey;
     this.host = options.host ?? defaultHost;
-    this.logger = options.logger ?? new Logger();
+    this.logger = options.logger ?? new core.Logger();
     const wsUrl = new URL('/streams', this.host);
     wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
