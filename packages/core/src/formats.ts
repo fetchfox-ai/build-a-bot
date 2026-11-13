@@ -1,12 +1,11 @@
-import beautify from 'js-beautify';
 import { parse, HTMLElement, type Node } from 'node-html-parser';
+import { beautifyHtml } from './util/beautify.js';
 
 export const defaultRemoveTags = ['style', 'svg', 'symbol', 'noscript', 'template', 'canvas'];
 
 export const defaultRemoveAttributes = ['style', 'srcset'];
 
-const pretty = (html: string, indentSize?: number) =>
-  beautify.html(html, { indent_size: indentSize }).replaceAll(/\n\s*\n/g, '\n');
+const pretty = (html: string, indentSize?: number) => beautifyHtml(html, indentSize).replaceAll(/\n\s*\n/g, '\n');
 
 const parseHtml = (html: string) => parse(html || '', { comment: true });
 
