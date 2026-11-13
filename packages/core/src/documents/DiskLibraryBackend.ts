@@ -2,7 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { cb } from '../cache/busters.js';
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 import type { DocumentId, DocumentLibraryBackend, StoredDocument } from './DocumentLibrary.js';
 
 const hasCode = (e: unknown, code: string): boolean =>
@@ -11,11 +11,11 @@ const hasCode = (e: unknown, code: string): boolean =>
 export type DiskLibraryBackendOptions = {
   namespace: string;
   rootDir?: string;
-  logger: Logger;
+  logger: ILogger;
 };
 
 export class DiskLibraryBackend implements DocumentLibraryBackend {
-  readonly logger: Logger;
+  readonly logger: ILogger;
   dirname: string;
   readonly cacheScope: string;
 

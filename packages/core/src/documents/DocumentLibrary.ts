@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { collapseHtml, collapseJson, remove, slimHtml } from '../formats.js';
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 import { hash } from '../util/index.js';
 import { MemoryLibraryBackend } from './MemoryLibraryBackend.js';
 
@@ -119,12 +119,12 @@ const merge = (doc1: Pick<StoredDocument, 'id'>, doc2: DocumentInput): StoredDoc
 
 export type DocumentLibraryOptions = {
   backend?: DocumentLibraryBackend;
-  logger: Logger;
+  logger: ILogger;
 };
 
 export class DocumentLibrary {
   readonly cacheScope: string;
-  readonly logger: Logger;
+  readonly logger: ILogger;
   private backend: DocumentLibraryBackend;
 
   constructor(options: DocumentLibraryOptions) {

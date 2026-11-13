@@ -2,7 +2,7 @@ import { omit } from 'radash';
 import { cb } from '../../../cache/busters.js';
 import { type DiskCache } from '../../../cache/DiskCache.js';
 import { toolCacheInput } from '../../../cache/toolCacheKey.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 import { getOrNull, hash } from '../../../util/index.js';
 import { isToolFailure } from '../../toolError.js';
 
@@ -15,12 +15,12 @@ const uncacheable = (step: { toolId: string; output: unknown }): boolean =>
 export type BrowserToolCacheOptions = {
   cache: CacheBackend;
   cacheScope?: string;
-  logger: Logger;
+  logger: ILogger;
 };
 
 export class BrowserToolCache {
   readonly cacheScope: string;
-  readonly logger: Logger;
+  readonly logger: ILogger;
   cache: CacheBackend;
   sequences: Record<string, { toolId: string; input: any; output: any }[]>;
 

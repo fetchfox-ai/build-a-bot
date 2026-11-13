@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import type { Page } from 'playwright';
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { DocumentLibrary, MemoryLibraryBackend } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { withReadiness } from '../../src/mastra/tools/browserTools/readiness.js';
 import { executors } from '../../src/mastra/tools/browserTools/tools.js';
@@ -17,12 +17,12 @@ const registry = new ProxyRegistry({
   proxies: [new NoProxy()],
 });
 const library = new DocumentLibrary({
-  backend: new MemoryLibraryBackend({ logger: createLogger() }),
-  logger: createLogger(),
+  backend: new MemoryLibraryBackend({ logger: new Logger() }),
+  logger: new Logger(),
 });
 const session = new BrowserSession({
   proxyRegistry: registry,
-  logger: createLogger(),
+  logger: new Logger(),
 });
 const server = createServer((req, resp) => {
   if (req.url === '/hydrate') {
@@ -69,7 +69,7 @@ it('returns useful DOM while an unrelated asset keeps load pending', async () =>
     'Timeout'
   );
   await expect(
-    executors.gotoTool(library, session, { cursorId, url }, undefined, { logger: createLogger() })
+    executors.gotoTool(library, session, { cursorId, url }, undefined, { logger: new Logger() })
   ).resolves.toMatchObject({
     ok: true,
   });
@@ -77,7 +77,7 @@ it('returns useful DOM while an unrelated asset keeps load pending', async () =>
 });
 it('preserves Markdown content without HTML conversion', async () => {
   const tools = await createTools({
-    logger: createLogger(),
+    logger: new Logger(),
     documentLibrary: library,
     proxyRegistry: registry,
   });
@@ -125,7 +125,7 @@ it('reports unresolved dynamic requests as a timeout and cleans up on failure', 
 
 it.each([null, ''])('treats empty GET body %s as omitted', async (body) => {
   const tools = await createTools({
-    logger: createLogger(),
+    logger: new Logger(),
     documentLibrary: library,
     proxyRegistry: registry,
   });
@@ -137,7 +137,7 @@ it.each([null, ''])('treats empty GET body %s as omitted', async (body) => {
 });
 it('still rejects nonempty GET bodies', async () => {
   const tools = await createTools({
-    logger: createLogger(),
+    logger: new Logger(),
     documentLibrary: library,
     proxyRegistry: registry,
   });

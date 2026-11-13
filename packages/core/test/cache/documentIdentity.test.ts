@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DocumentLibrary, type DocumentInput } from '../../src/documents/DocumentLibrary.js';
 import { MemoryLibraryBackend } from '../../src/documents/MemoryLibraryBackend.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 
 const documentInput = (overrides: Partial<DocumentInput> = {}): DocumentInput => ({
   url: 'https://pokeapi.co/api/v2/pokemon/pikachu',
@@ -22,8 +22,8 @@ const documentInput = (overrides: Partial<DocumentInput> = {}): DocumentInput =>
 describe('document identity', () => {
   it('is stable across repeated fetches with different timestamps and headers', () => {
     const library = new DocumentLibrary({
-      backend: new MemoryLibraryBackend({ logger: createLogger() }),
-      logger: createLogger(),
+      backend: new MemoryLibraryBackend({ logger: new Logger() }),
+      logger: new Logger(),
     });
     const firstId = library.save(documentInput());
     const secondId = library.save(
@@ -43,8 +43,8 @@ describe('document identity', () => {
 
   it('changes when the fetched content changes', () => {
     const library = new DocumentLibrary({
-      backend: new MemoryLibraryBackend({ logger: createLogger() }),
-      logger: createLogger(),
+      backend: new MemoryLibraryBackend({ logger: new Logger() }),
+      logger: new Logger(),
     });
     const firstId = library.save(documentInput());
     const secondId = library.save(documentInput({ content: '{"name":"raichu"}' }));
@@ -54,8 +54,8 @@ describe('document identity', () => {
 
   it('keeps completed responses from separate navigations distinct', () => {
     const library = new DocumentLibrary({
-      backend: new MemoryLibraryBackend({ logger: createLogger() }),
-      logger: createLogger(),
+      backend: new MemoryLibraryBackend({ logger: new Logger() }),
+      logger: new Logger(),
     });
     const first = documentInput();
     first.request = { ...first.request, mode: 'browser', captureId: 'first' };

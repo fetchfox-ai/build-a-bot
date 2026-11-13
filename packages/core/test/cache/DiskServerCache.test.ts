@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { DiskServerCache } from '../../src/mastra/extensions/cache/DiskServerCache.js';
 
 const rootDirs: string[] = [];
@@ -17,7 +17,7 @@ const createCache = async (
   options: Partial<ConstructorParameters<typeof DiskServerCache>[0]> = {}
 ) => {
   const rootDir = options.rootDir ?? (await createRootDir());
-  return new DiskServerCache({ logger: createLogger(), ...options, rootDir });
+  return new DiskServerCache({ logger: new Logger(), ...options, rootDir });
 };
 
 describe('DiskServerCache', () => {
@@ -29,13 +29,13 @@ describe('DiskServerCache', () => {
 
   it('persists values across instances with the same key prefix', async () => {
     const rootDir = await createRootDir();
-    const first = new DiskServerCache({ logger: createLogger(), keyPrefix: 'test:', rootDir });
+    const first = new DiskServerCache({ logger: new Logger(), keyPrefix: 'test:', rootDir });
     await first.set('product', { name: 'Red Sneakers' });
 
-    const second = new DiskServerCache({ logger: createLogger(), keyPrefix: 'test:', rootDir });
+    const second = new DiskServerCache({ logger: new Logger(), keyPrefix: 'test:', rootDir });
     await expect(second.get('product')).resolves.toEqual({ name: 'Red Sneakers' });
 
-    const isolated = new DiskServerCache({ logger: createLogger(), keyPrefix: 'other:', rootDir });
+    const isolated = new DiskServerCache({ logger: new Logger(), keyPrefix: 'other:', rootDir });
     await expect(isolated.get('product')).resolves.toBeUndefined();
   });
 

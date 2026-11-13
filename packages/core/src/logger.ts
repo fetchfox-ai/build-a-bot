@@ -10,7 +10,8 @@ const logLevels: Record<string, LogLevel> = {
   trace: LogLevel.TRACE,
   warn: LogLevel.WARN,
 };
-export interface Logger {
+
+export interface ILogger {
   silly(...args: unknown[]): void;
   trace(...args: unknown[]): void;
   debug(...args: unknown[]): void;
@@ -20,32 +21,34 @@ export interface Logger {
   fatal(...args: unknown[]): void;
 }
 
-export const createLogger = (): Logger =>
-  new TsLogger<Record<string, unknown>>({
-    name: 'builder',
-    minLevel: logLevels[logLevel?.toLowerCase() ?? ''],
-    type: 'hidden',
-    pretty: {
-      style: true,
-      inspectOptions: {
-        depth: 3,
-        maxArrayLength: 20,
-        maxStringLength: 5_000,
-        compact: true,
-        breakLength: 120,
-      },
-      template: '{{yyyy}}.{{mm}}.{{dd}} {{hh}}:{{MM}}:{{ss}}:{{ms}}\t{{logLevelName}}\t{{name}}\t',
-    },
-    stack: { capture: 'lazy' },
-    attachedTransports: [
-      {
-        format: 'pretty',
-        write: (record, line) => {
-          const source = record._logMeta.path?.filePathWithLine;
-          process.stdout.write(`${line}${source == null ? '' : `\t${source}`}\n`);
+export class Logger extends TsLogger<Record<string, unknown>> {
+  constructor() {
+    super({
+      name: 'builder',
+      minLevel: logLevels[logLevel?.toLowerCase() ?? ''],
+      type: 'hidden',
+      pretty: {
+        style: true,
+        inspectOptions: {
+          depth: 3,
+          maxArrayLength: 20,
+          maxStringLength: 5_000,
+          compact: true,
+          breakLength: 120,
         },
+        template:
+          '{{yyyy}}.{{mm}}.{{dd}} {{hh}}:{{MM}}:{{ss}}:{{ms}}\t{{logLevelName}}\t{{name}}\t',
       },
-    ],
-  });
-
-export const logger = createLogger();
+      stack: { capture: 'lazy' },
+      attachedTransports: [
+        {
+          format: 'pretty',
+          write: (record, line) => {
+            const source = record._logMeta.path?.filePathWithLine;
+            process.stdout.write(`${line}${source == null ? '' : `\t${source}`}\n`);
+          },
+        },
+      ],
+    });
+  }
+}

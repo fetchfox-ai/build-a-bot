@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { afterEach, beforeEach, expect, it } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/DocumentLibrary.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
 import {
@@ -15,14 +15,14 @@ import { MemoryCache } from '../lib/MemoryCache.js';
 
 let session: BrowserSession;
 const library = new DocumentLibrary({
-  logger: createLogger(),
+  logger: new Logger(),
 });
 beforeEach(async () => {
   session = new BrowserSession({
     proxyRegistry: new ProxyRegistry({
       proxies: [new NoProxy()],
     }),
-    logger: createLogger(),
+    logger: new Logger(),
   });
   await session.createCursor('test');
 });
@@ -218,13 +218,13 @@ it('replays cached fills and key presses before an uncached inspection', async (
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   try {
     const tools = await createTools({
-      logger: createLogger(),
+      logger: new Logger(),
       documentLibrary: library,
       browserSession: session,
       proxyRegistry: session.proxyRegistry,
       cache: new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       }),
     });
     const execute = async (name: string, input: Record<string, unknown> = {}): Promise<any> =>

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 
 export type DiskCacheOptions = {
   namespace: string;
@@ -9,7 +9,7 @@ export type DiskCacheOptions = {
   readOnly?: boolean;
   ttlMs?: number;
   writeOnly?: boolean;
-  logger: Logger;
+  logger: ILogger;
 };
 
 type CacheEntry<Value> = {
@@ -28,7 +28,7 @@ const isCacheEntry = <Value>(val: unknown): val is CacheEntry<Value> =>
   'val' in val;
 
 export class DiskCache<Value = unknown> {
-  readonly logger: Logger;
+  readonly logger: ILogger;
   readonly dirname: string;
   readonly readOnly: boolean;
   readonly ttlMs: number;

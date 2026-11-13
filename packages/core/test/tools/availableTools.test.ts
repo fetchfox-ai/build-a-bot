@@ -1,6 +1,6 @@
 import { type Tool } from '@mastra/core/tools';
 import { describe, expect, it } from 'vitest';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import {
   addInstruments,
   cacheInstrument,
@@ -10,9 +10,9 @@ import {
 
 describe('available tools', () => {
   it('includes only marked tools', async () => {
-    const fetchTool = await markAvailableTool(tool('fetchTool'), createLogger());
-    const browserTool = await markAvailableTool(tool('browserTools_gotoTool'), createLogger());
-    const documentTool = await markAvailableTool(tool('documentTools_getTool'), createLogger());
+    const fetchTool = await markAvailableTool(tool('fetchTool'), new Logger());
+    const browserTool = await markAvailableTool(tool('browserTools_gotoTool'), new Logger());
+    const documentTool = await markAvailableTool(tool('documentTools_getTool'), new Logger());
 
     expect(
       selectAvailableTools({
@@ -36,14 +36,14 @@ describe('available tools', () => {
     const cachedThenAvailable = await addInstruments(
       [cacheInstrument, markAvailableTool],
       cacheThenAvailable,
-      createLogger()
+      new Logger()
     );
     const availableThenCached = await addInstruments(
       [markAvailableTool, cacheInstrument],
       availableThenCache,
-      createLogger()
+      new Logger()
     );
-    const cachedUnmarked = await cacheInstrument(unmarked, createLogger());
+    const cachedUnmarked = await cacheInstrument(unmarked, new Logger());
 
     expect(cachedThenAvailable).not.toBe(cacheThenAvailable);
     expect(availableThenCached).not.toBe(availableThenCache);
@@ -68,7 +68,7 @@ describe('available tools', () => {
         throw new Error('Temporary failure');
       },
     };
-    const cachedTool = await cacheInstrument(failingTool, createLogger());
+    const cachedTool = await cacheInstrument(failingTool, new Logger());
 
     await expect(cachedTool.execute!({}, {} as any)).rejects.toThrow('Temporary failure');
     await expect(cachedTool.execute!({}, {} as any)).rejects.toThrow('Temporary failure');

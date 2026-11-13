@@ -1,7 +1,7 @@
 import { InMemoryServerCache } from '@mastra/core/cache';
 import { describe, expect, it } from 'vitest';
 import { responseCacheHashInput } from '../../src/cache/responseCacheKey.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { hash } from '../../src/util/index.js';
 
 type RunMetadata = {
@@ -49,7 +49,7 @@ const promptForRun = (metadata: RunMetadata) => [
 const cacheKeyForPrompt = (prompt: unknown): string =>
   hash(
     responseCacheHashInput({
-      logger: createLogger(),
+      logger: new Logger(),
       cacheBuster: 'test',
       tools: ['fetch:{input-schema}:{output-schema}'],
       prompt,

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { brightdataApiKey } from '../../src/constants.js';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { createTools as createFetchTools } from '../../src/mastra/tools/fetchTools/tools.js';
 import { BrightDataForwardProxy, ProxyRegistry, isHttpProxy } from '../../src/proxy/index.js';
 import { createBrightdataProxies } from '../../src/proxy/provision.js';
@@ -13,7 +13,7 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data proxies', () => {
   beforeAll(async () => {
     // Keep the shared datacenter zone for subsequent test runs.
     registry = await createBrightdataProxies('fetchfox', ['datacenterShared'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
   }, 180_000);
 
@@ -28,11 +28,11 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data proxies', () => {
   it('preserves the target URL and separates cached proxy choices in fetch tools', async () => {
     const shared = registry.require('fetchfox-datacenterShared') as BrightDataForwardProxy;
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     // Exercise two registry IDs without provisioning another zone.
     const tools = await createFetchTools({
-      logger: createLogger(),
+      logger: new Logger(),
       documentLibrary,
       proxyRegistry: new ProxyRegistry({
         proxies: [

@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { createGlobalContext, mergeContext, type GlobalContext } from '../../src/context/index.js';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
 import { createTools } from '../../src/mastra/tools/browserTools/tools.js';
@@ -19,9 +19,9 @@ vi.mock('../../src/constants.js', async (importOriginal) => ({
 const contexts: GlobalContext[] = [];
 const makeContext = async () => {
   const context = await createGlobalContext({
-    logger: createLogger(),
+    logger: new Logger(),
     documentLibrary: new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     }),
   });
   contexts.push(context);
@@ -38,13 +38,13 @@ it('closes only its own pages, including matching cursor IDs in another context'
   const second = await makeContext();
   const makeTools = (context: GlobalContext) =>
     createTools({
-      logger: createLogger(),
+      logger: new Logger(),
       browserSession: context.browserSession,
       documentLibrary: context.documentLibrary,
       proxyRegistry: context.proxyRegistry,
       cache: new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       }),
     });
   const firstTools = await makeTools(first);
@@ -147,15 +147,15 @@ it('uses an injected session and removes the fallback exit listener on explicit 
   });
   const browserSession = new BrowserSession({
     proxyRegistry,
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const listeners = process.listenerCount('beforeExit');
   const context = await createGlobalContext({
-    logger: createLogger(),
+    logger: new Logger(),
     browserSession,
     proxyRegistry,
     documentLibrary: new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     }),
   });
   contexts.push(context);
@@ -167,7 +167,7 @@ it('uses an injected session and removes the fallback exit listener on explicit 
   expect(process.listenerCount('beforeExit')).toBe(listeners);
   await expect(
     createGlobalContext({
-      logger: createLogger(),
+      logger: new Logger(),
       browserSession,
       proxyRegistry: new ProxyRegistry(),
     })

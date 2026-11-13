@@ -1,11 +1,11 @@
 import { MastraLogger } from '@mastra/core/logger';
-import type { Logger } from '../logger.js';
+import type { ILogger } from '../logger.js';
 
-export type RuntimeLoggerOptions = { logger: Logger };
+export type RuntimeLoggerOptions = { logger: ILogger };
 
 /** Routes Mastra's internal logging through the runtime's configured logger. */
 export class RuntimeLogger extends MastraLogger {
-  readonly logger: Logger;
+  readonly logger: ILogger;
 
   constructor(options: RuntimeLoggerOptions) {
     super({ name: 'builder' });

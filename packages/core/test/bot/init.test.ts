@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { Bot, BotTemplate, ClassSpec, FunctionSpec } from '../../src/bots/index.js';
 import { createGlobalContext, type GlobalContext } from '../../src/context/index.js';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 
 let context: GlobalContext;
 let template: BotTemplate;
@@ -23,7 +23,7 @@ const code = `
 `;
 
 beforeEach(async () => {
-  const logger = createLogger();
+  const logger = new Logger();
   context = await createGlobalContext({
     logger,
     documentLibrary: new DocumentLibrary({ logger }),

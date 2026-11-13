@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
 import { browserCacheInstrument } from '../../src/mastra/tools/browserTools/instruments.js';
@@ -14,7 +14,7 @@ it.each([{ ok: false }, { error: true }, { isError: true }])(
     const backend = new MemoryCache();
     const cache = new BrowserToolCache({
       cache: backend,
-      logger: createLogger(),
+      logger: new Logger(),
     });
     await cache.recordToolCall('failed', 'goto', { url: 'https://example.test' }, failure);
     await cache.recordToolCall('failed', 'content', {}, { text: 'error page' });
@@ -34,7 +34,7 @@ it.each([null, false, 0, ''])(
   async (output) => {
     const cache = new BrowserToolCache({
       cache: new MemoryCache(),
-      logger: createLogger(),
+      logger: new Logger(),
     });
     expect((await cache.checkToolCall('fresh', 'content', {})).hit).toBe(false);
     await cache.recordToolCall('first', 'content', {}, output);
@@ -49,7 +49,7 @@ it.each([null, false, 0, ''])(
 it('ignores background settings in browser cache keys and replay prefixes', async () => {
   const cache = new BrowserToolCache({
     cache: new MemoryCache(),
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const input = { cursorId: 'old', url: 'https://example.test', _background: { enabled: true } };
   await cache.recordToolCall('old', 'goto', input, { ok: true });
@@ -64,16 +64,16 @@ it('ignores background settings in browser cache keys and replay prefixes', asyn
 });
 
 it('resets reused cursor history and live status while keeping other cursors and cached results', async () => {
-  const documentLibrary = new DocumentLibrary({ logger: createLogger() });
+  const documentLibrary = new DocumentLibrary({ logger: new Logger() });
   const cache = new BrowserToolCache({
     cache: new MemoryCache(),
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const session = new BrowserSession({
     proxyRegistry: new ProxyRegistry({
       proxies: [new NoProxy()],
     }),
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const replay = vi.fn(async () => {});
   const instrument = browserCacheInstrument(replay, cache, session);

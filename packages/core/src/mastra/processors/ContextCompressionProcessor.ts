@@ -1,9 +1,9 @@
 import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import type { ProcessInputStepArgs, Processor } from '@mastra/core/processors';
-import { type Logger } from '../../logger.js';
+import { type ILogger } from '../../logger.js';
 
 export type ContextCompressionProcessorOptions = {
-  logger: Logger;
+  logger: ILogger;
   /** Maximum serialized characters retained from one tool result. */
   maxCharsPerToolResult?: number;
 };
@@ -21,7 +21,7 @@ export class ContextCompressionProcessor implements Processor<'context-compressi
   readonly id = 'context-compression';
   readonly name = 'Context Compression';
 
-  readonly logger: Logger;
+  readonly logger: ILogger;
 
   #maxCharsPerToolResult: number;
 

@@ -1,4 +1,4 @@
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 import type { DocumentId, DocumentLibraryBackend, StoredDocument } from './DocumentLibrary.js';
 
 const clone = (document: StoredDocument): StoredDocument => ({
@@ -10,10 +10,10 @@ const clone = (document: StoredDocument): StoredDocument => ({
   },
 });
 
-export type MemoryLibraryBackendOptions = { logger: Logger };
+export type MemoryLibraryBackendOptions = { logger: ILogger };
 
 export class MemoryLibraryBackend implements DocumentLibraryBackend {
-  readonly logger: Logger;
+  readonly logger: ILogger;
   private documents = new Map<DocumentId, StoredDocument>();
 
   constructor(options: MemoryLibraryBackendOptions) {

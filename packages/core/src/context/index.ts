@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import { type Mastra } from '@mastra/core';
 import type { TracingEvent } from '@mastra/core/observability';
 import { DocumentLibrary, DiskLibraryBackend } from '../documents/index.js';
-import { type Logger, createLogger } from '../logger.js';
+import { type ILogger, Logger } from '../logger.js';
 import { defaultMastra } from '../mastra/create.js';
 import { BrowserSession } from '../mastra/tools/browserTools/BrowserSession.js';
 import { closeTools } from '../mastra/tools/index.js';
@@ -22,7 +22,7 @@ export type GlobalOptions = {
   proxyRegistry?: ProxyRegistry;
   rootDirectory?: string;
   emitter?: EventEmitter;
-  logger?: Logger;
+  logger?: ILogger;
 };
 
 const defaultRootDirectory = 'build-a-bot';
@@ -71,7 +71,7 @@ export class GlobalContext {
   readonly proxyRegistry: ProxyRegistry;
   readonly rootDirectory: string;
   readonly emitter: EventEmitter;
-  readonly logger: Logger;
+  readonly logger: ILogger;
   private readonly closeFn: (context: GlobalContext) => Promise<void>;
   private closePromise?: Promise<void>;
 
@@ -161,7 +161,7 @@ export const mergeContext = (
 export const createGlobalContext = async (options: GlobalOptions): Promise<GlobalContext> => {
   const brightDataApiKey = options.brightDataApiKey ?? null;
   const openRouterApiKey = options.openRouterApiKey ?? null;
-  const logger = options.logger ?? createLogger();
+  const logger = options.logger ?? new Logger();
   const rootDirectory = options.rootDirectory || defaultRootDirectory;
   let itemStorage: IItemStorage;
   if (options.itemStorage === undefined) {

@@ -1,6 +1,6 @@
 import { chromium, type Browser, type BrowserContext, type Page, type Response } from 'playwright';
 import { type DocumentRequest } from '../../../documents/index.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 import {
   isBrowserProxy,
   isCdpProxy,
@@ -26,7 +26,7 @@ type CursorRecord = {
 
 export type BrowserSessionOptions = {
   proxyRegistry: ProxyRegistry;
-  logger: Logger;
+  logger: ILogger;
 };
 
 export class BrowserSession {
@@ -34,7 +34,7 @@ export class BrowserSession {
   private browser?: Promise<Browser>;
 
   readonly proxyRegistry: ProxyRegistry;
-  readonly logger: Logger;
+  readonly logger: ILogger;
 
   constructor(options: BrowserSessionOptions) {
     this.proxyRegistry = options.proxyRegistry;

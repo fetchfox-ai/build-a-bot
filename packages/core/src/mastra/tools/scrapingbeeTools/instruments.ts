@@ -2,11 +2,11 @@ import { type Tool } from '@mastra/core/tools';
 import { memo } from 'radash';
 import { z } from 'zod';
 import { scrapingbeeApiKey } from '../../../constants.js';
-import type { Logger } from '../../../logger.js';
+import type { ILogger } from '../../../logger.js';
 import { getOrNull } from '../../../util/index.js';
 import { addMetric, instrumentOutputSchema } from '../../instruments/shared.js';
 
-export const scrapingbeeCostInstrument = async (tool: Tool, logger: Logger): Promise<Tool> => {
+export const scrapingbeeCostInstrument = async (tool: Tool, logger: ILogger): Promise<Tool> => {
   const credits = scrapingbeeCredits(tool.id);
   if (!credits || tool.outputSchema === undefined || tool.outputSchema === null) {
     return tool;

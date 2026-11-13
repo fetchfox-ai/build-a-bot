@@ -1,12 +1,12 @@
 import { expect, it } from 'vitest';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
 import { MemoryCache } from '../lib/MemoryCache.js';
 
 it('does not reuse or overwrite settled content after an unsettled navigation', async () => {
   const cache = new BrowserToolCache({
     cache: new MemoryCache(),
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const nav = { url: 'https://example.test/job', proxy: 'none' };
   const settled = { ok: true, readiness: { state: 'settled' } };

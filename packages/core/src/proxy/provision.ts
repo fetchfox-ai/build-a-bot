@@ -1,5 +1,5 @@
 import { brightdataApiKey } from '../constants.js';
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 import { getOrNull } from '../util/index.js';
 import { BrightDataForwardProxy } from './BrightDataForwardProxy.js';
 import { BrightDataRequestProxy } from './BrightDataRequestProxy.js';
@@ -9,7 +9,7 @@ import { ProxyRegistry } from './ProxyRegistry.js';
 export type BrightdataProxyType = 'datacenterShared' | 'residential' | 'residentialCdp' | 'unlock';
 
 export type BrightdataProvisionOptions = {
-  logger: Logger;
+  logger: ILogger;
   apiKey?: string;
   superProxyServer?: string;
 };

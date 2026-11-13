@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { DocumentLibrary } from '../../../src/documents/index.js';
-import { createLogger } from '../../../src/logger.js';
+import { Logger } from '../../../src/logger.js';
 import { executors } from '../../../src/mastra/tools/documents/tools.js';
 
 describe('document tools', () => {
   it('lists saved documents and gets a selected representation', async () => {
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const documentId = documentLibrary.save({
       url: 'https://example.test/catalog',
@@ -55,7 +55,7 @@ describe('document tools', () => {
 
   it('rejects unknown document IDs', async () => {
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     await expect(
       executors.getTool(documentLibrary, {
@@ -68,7 +68,7 @@ describe('document tools', () => {
 
   it('gets multiple documents with independently selected representations', async () => {
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const htmlId = documentLibrary.save({
       url: 'https://example.test/catalog',
@@ -121,7 +121,7 @@ describe('document tools', () => {
 
   it('rejects a batch containing an unknown document ID', async () => {
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     await expect(
       executors.getManyTool(documentLibrary, {

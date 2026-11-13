@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createGlobalContext } from '../../src/context/index.js';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { asJSONSchema } from '../../src/mastra/instruments/shared.js';
 import { createTools as createDocumentTools } from '../../src/mastra/tools/documents/tools.js';
 import {
@@ -34,7 +34,7 @@ const execute = async (tools: Record<string, any>, name: string, input: Record<s
 describe('fetch tool registry configuration', () => {
   it('derives HTTP proxy names from each injected registry', async () => {
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const proxyRegistry = new ProxyRegistry({
       proxies: [
@@ -46,7 +46,7 @@ describe('fetch tool registry configuration', () => {
       ],
     });
     const tools = await createFetchTools({
-      logger: createLogger(),
+      logger: new Logger(),
       documentLibrary,
       proxyRegistry,
     });
@@ -54,7 +54,7 @@ describe('fetch tool registry configuration', () => {
     expect(schema.properties.proxy.enum).toEqual(['none']);
     expect(
       await createFetchTools({
-        logger: createLogger(),
+        logger: new Logger(),
         documentLibrary,
         proxyRegistry: new ProxyRegistry(),
       })
@@ -63,7 +63,7 @@ describe('fetch tool registry configuration', () => {
 
   it('rejects missing proxies and browser-only proxies before fetching', async () => {
     const documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const proxyRegistry = new ProxyRegistry({
       proxies: [
@@ -79,7 +79,7 @@ describe('fetch tool registry configuration', () => {
         documentLibrary,
         proxyRegistry,
         { url, proxy: 'missing' },
-        { logger: createLogger() }
+        { logger: new Logger() }
       )
     ).rejects.toThrow('Unknown proxy: missing');
     await expect(
@@ -87,7 +87,7 @@ describe('fetch tool registry configuration', () => {
         documentLibrary,
         proxyRegistry,
         { url, proxy: 'browser' },
-        { logger: createLogger() }
+        { logger: new Logger() }
       )
     ).rejects.toThrow('does not support fetch');
   });
@@ -104,10 +104,10 @@ describe('fetch tools (NoProxy)', () => {
       proxies: [new NoProxy()],
     });
     documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
-    fetchTools = await createFetchTools({ logger: createLogger(), documentLibrary, proxyRegistry });
-    documentTools = await createDocumentTools({ logger: createLogger(), documentLibrary });
+    fetchTools = await createFetchTools({ logger: new Logger(), documentLibrary, proxyRegistry });
+    documentTools = await createDocumentTools({ logger: new Logger(), documentLibrary });
   });
 
   it('fetches an HTTP error response with top-level fields and runtime metadata', async () => {
@@ -165,7 +165,7 @@ describe('fetch tools (NoProxy)', () => {
 
   it('passes the context registry and document library through Mastra to fetch tools', async () => {
     const context = await createGlobalContext({
-      logger: createLogger(),
+      logger: new Logger(),
       documentLibrary,
       proxyRegistry,
     });

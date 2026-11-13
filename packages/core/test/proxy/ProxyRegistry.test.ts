@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
 import { createGlobalContext, GlobalContext, mergeContext } from '../../src/context/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { CdpProxy, NoProxy, ProxyRegistry } from '../../src/proxy/index.js';
 import { FileItemStorage } from '../../src/data/services/storage/FileItemStorage.js';
@@ -52,8 +52,8 @@ describe('GlobalContext proxy registry', () => {
   };
 
   it('uses a registry with the direct proxy by default', async () => {
-    const context = await createGlobalContext({ logger: createLogger(), ...dependencies });
-    const other = await createGlobalContext({ logger: createLogger(), ...dependencies });
+    const context = await createGlobalContext({ logger: new Logger(), ...dependencies });
+    const other = await createGlobalContext({ logger: new Logger(), ...dependencies });
 
     expect(context.proxyRegistry.require('none')).toBeInstanceOf(NoProxy);
     expect(other.proxyRegistry).not.toBe(context.proxyRegistry);
@@ -66,12 +66,12 @@ describe('GlobalContext proxy registry', () => {
     });
     const context = new GlobalContext({
       emitter: new EventEmitter(),
-      logger: createLogger(),
+      logger: new Logger(),
       brightDataApiKey: null,
       openRouterApiKey: null,
       browserSession: new BrowserSession({
         proxyRegistry,
-        logger: createLogger(),
+        logger: new Logger(),
       }),
       itemStorage: new FileItemStorage({ directory: 'build-a-bot/items', format: 'jsonl' }),
       ...dependencies,
@@ -90,7 +90,7 @@ describe('GlobalContext proxy registry', () => {
       proxies: [new NoProxy()],
     });
     const context = await createGlobalContext({
-      logger: createLogger(),
+      logger: new Logger(),
       ...dependencies,
       proxyRegistry: registry,
     });
@@ -100,7 +100,7 @@ describe('GlobalContext proxy registry', () => {
 
   it('creates item storage from storage options', async () => {
     const context = await createGlobalContext({
-      logger: createLogger(),
+      logger: new Logger(),
       ...dependencies,
       itemStorage: { directory: 'build-a-bot/custom-items', format: 'jsonl', type: 'file' },
     });

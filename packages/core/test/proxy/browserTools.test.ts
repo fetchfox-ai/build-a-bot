@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { chromium, type BrowserContext } from 'playwright';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { asJSONSchema } from '../../src/mastra/instruments/shared.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
@@ -20,7 +20,7 @@ describe('browser tools with browser-capable proxies', () => {
   const createTools = async (
     options: Omit<Parameters<typeof createBrowserTools>[0], 'browserSession' | 'logger'>
   ) => {
-    const logger = createLogger();
+    const logger = new Logger();
     const browserSession = new BrowserSession({
       proxyRegistry: options.proxyRegistry,
       logger,
@@ -53,7 +53,7 @@ describe('browser tools with browser-capable proxies', () => {
 
   beforeEach(() => {
     documentLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     proxyRegistry = new ProxyRegistry({
       proxies: [
@@ -115,7 +115,7 @@ describe('browser tools with browser-capable proxies', () => {
     expect(httpTools.browserTools_newPageTool).toBeDefined();
     const session = new BrowserSession({
       proxyRegistry,
-      logger: createLogger(),
+      logger: new Logger(),
     });
     await expect(session.createCursor(null, 'http')).resolves.toEqual({
       cursorId: expect.any(String),
@@ -130,7 +130,7 @@ describe('browser tools with browser-capable proxies', () => {
       proxyRegistry,
       cache: new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       }),
     });
     const cursor = await execute(tools, 'newPage', { proxy: 'http' });
@@ -149,7 +149,7 @@ describe('browser tools with browser-capable proxies', () => {
       proxyRegistry,
       cache: new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       }),
     });
     const url = `${site.baseUrl}/`;
@@ -187,11 +187,11 @@ describe('browser tools with browser-capable proxies', () => {
       }),
       cache: new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       }),
     });
     const localLibrary = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const localTools = await createTools({
       documentLibrary: localLibrary,
@@ -200,7 +200,7 @@ describe('browser tools with browser-capable proxies', () => {
       }),
       cache: new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       }),
     });
     const schema = asJSONSchema(remoteTools.browserTools_newPageTool.inputSchema!, 'input') as any;
@@ -238,7 +238,7 @@ describe('browser tools with browser-capable proxies', () => {
         proxyRegistry,
         cache: new BrowserToolCache({
           cache: new MemoryCache(),
-          logger: createLogger(),
+          logger: new Logger(),
         }),
       });
       const cursor = await execute(tools, 'newPage', { proxy: 'remote' });

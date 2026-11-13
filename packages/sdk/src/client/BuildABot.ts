@@ -20,7 +20,7 @@ class DataBots {
 
   async build(options: Omit<DataBotOptions, 'client'>): Promise<DataBot> {
     const bot = new DataBot({ ...options, client: this.client });
-    await bot.build();
+    await bot.build({ forceRebuild: true });
     return bot;
   }
 }
@@ -28,12 +28,25 @@ class DataBots {
 export class BuildABot {
   readonly apiKey: string;
   readonly host: string;
+  readonly ws: WebSocket;
   readonly data: { bots: DataBots };
   #user?: Promise<User>;
 
   constructor(options: BuildABotOptions) {
     this.apiKey = options.apiKey;
     this.host = options.host ?? defaultHost;
+    const wsUrl = new URL('/streams', this.host);
+    wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    console.log('wsUrl:', wsUrl);
+
+    this.ws = new WebSocket(wsUrl);
+    this.ws.addEventListener('open', () => {
+      this.ws.send(JSON.stringify({ apiKey: this.apiKey }));
+    });
+    this.ws.addEventListener('message', (event) => {
+      console.log('[BuildABot stream]', event.data);
+    });
     this.data = { bots: new DataBots({ client: this }) };
   }
 

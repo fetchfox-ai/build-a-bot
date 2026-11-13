@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { composedHtml, frameAt } from '../../src/mastra/tools/browserTools/dom.js';
 import { executors } from '../../src/mastra/tools/browserTools/tools.js';
@@ -11,7 +11,7 @@ it('snapshots nested open roots and slot fallback without mutating the page', as
     proxyRegistry: new ProxyRegistry({
       proxies: [new NoProxy()],
     }),
-    logger: createLogger(),
+    logger: new Logger(),
   });
   await session.createCursor('test');
   try {
@@ -29,7 +29,7 @@ it('snapshots nested open roots and slot fallback without mutating the page', as
     expect(await page.content()).not.toContain('data-shadow-root');
     expect(() => frameAt(page, [99])).toThrow('Frame path no longer exists');
     const library = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const result = await executors.contentTool(library, session, {
       cursorId: 'test',

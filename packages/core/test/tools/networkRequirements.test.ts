@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { chromium, type Page } from 'playwright';
 import { expect, it } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/DocumentLibrary.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { NetworkCapture } from '../../src/mastra/tools/browserTools/NetworkCapture.js';
 import { executors } from '../../src/mastra/tools/browserTools/tools.js';
 
@@ -24,9 +24,9 @@ const fixture = async (check: (env: Fixture) => Promise<void>) => {
     const page = await browser.newPage();
     const url = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
     const library = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
-    const capture = NetworkCapture.for(page, library, 'test', 'none', { logger: createLogger() });
+    const capture = NetworkCapture.for(page, library, 'test', 'none', { logger: new Logger() });
     capture.begin();
     await page.goto(url);
     const session = { getCursor: async () => ({ page, proxy: 'none' }) };
@@ -53,7 +53,7 @@ it('waits for every required endpoint despite unrelated completed JSON', async (
           requiredUrlPrefixes: [`${url}/product`, `${url}/price`],
         },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       )
       .then((val: { documents: Array<{ url: string }> }) => {
         resolved = true;
@@ -87,7 +87,7 @@ it('rejects a missing required endpoint instead of accepting unrelated JSON', as
           requiredUrlPrefixes: [`${url}/missing`],
         },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       )
     ).rejects.toThrow('Timed out');
   });

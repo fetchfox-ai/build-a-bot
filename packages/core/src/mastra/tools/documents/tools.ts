@@ -14,7 +14,7 @@ import {
   type DocumentLibrary,
   type DocumentSummary,
 } from '../../../documents/index.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 import { addInstruments, markAvailableTool, runtimeInstrument } from '../../instruments/index.js';
 
 const prefix = (str: string): string => 'documentTools_' + str;
@@ -167,7 +167,7 @@ const createGetManyTool = (documentLibrary: DocumentLibrary): any =>
   });
 
 export type CreateDocumentToolsOptions = {
-  logger: Logger;
+  logger: ILogger;
   documentLibrary: DocumentLibrary;
 };
 

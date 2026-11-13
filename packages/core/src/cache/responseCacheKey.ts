@@ -1,10 +1,10 @@
 import { pick } from 'radash';
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 import { getOrNull, hash } from '../util/index.js';
 import { toolCacheInput } from './toolCacheKey.js';
 
 type ResponseCacheHashInputArgs = {
-  logger: Logger;
+  logger: ILogger;
   cacheBuster: string;
   prompt: unknown;
   tools: string[];
@@ -23,7 +23,7 @@ export const responseCacheHashInput = ({
 
 export const serializePromptForCache = (
   prompt: unknown,
-  { logger }: { logger: Logger }
+  { logger }: { logger: ILogger }
 ): unknown[] => {
   if (!Array.isArray(prompt)) {
     throw new Error('Expected an array prompt when generating a cache key');

@@ -3,14 +3,14 @@ import { expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { DiskCache } from '../../src/cache/DiskCache.js';
 import { toolCacheInput, toolCacheSchema } from '../../src/cache/toolCacheKey.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { cacheInstrument } from '../../src/mastra/instruments/cacheInstrument.js';
 
 it.each([{ ok: false }, { error: true }, { isError: true }])(
   'does not cache returned failures: %j',
   async (failure) => {
     const execute = vi.fn().mockResolvedValueOnce(failure).mockResolvedValue({ ok: true });
-    const tool = await cacheInstrument({ id: randomUUID(), execute } as any, createLogger());
+    const tool = await cacheInstrument({ id: randomUUID(), execute } as any, new Logger());
     await tool.execute!({}, {} as any);
     await tool.execute!({}, {} as any);
     await tool.execute!({}, {} as any);
@@ -26,7 +26,7 @@ it.each([{ ok: false }, { error: true }, { isError: true }])(
       .mockResolvedValueOnce({ type: 'output', output: failure });
     try {
       const execute = vi.fn(async () => ({ ok: true }));
-      const tool = await cacheInstrument({ id: randomUUID(), execute } as any, createLogger());
+      const tool = await cacheInstrument({ id: randomUUID(), execute } as any, new Logger());
       await tool.execute!({}, {} as any);
       await tool.execute!({}, {} as any);
       expect(execute).toHaveBeenCalledOnce();
@@ -47,7 +47,7 @@ it('reuses a tool result when Mastra adds _background, but invalidates real sche
   };
   const input = { url: 'https://example.test' };
   const call = async () =>
-    (await cacheInstrument(tool as any, createLogger())).execute!(input, {} as any);
+    (await cacheInstrument(tool as any, new Logger())).execute!(input, {} as any);
   await call();
   tool.inputSchema = base.extend({ _background: z.boolean().optional() });
   const repeated = await call();
@@ -64,7 +64,7 @@ it('reuses a tool result when Mastra adds _background, but invalidates real sche
 
 it('ignores background execution settings in cache keys without changing tool arguments', async () => {
   const execute = vi.fn(async () => ({ ok: true }));
-  const tool = await cacheInstrument({ id: randomUUID(), execute } as any, createLogger());
+  const tool = await cacheInstrument({ id: randomUUID(), execute } as any, new Logger());
   const input = { url: 'https://example.test', _background: { enabled: true } };
   await tool.execute!(input, {} as any);
   await tool.execute!({ url: input.url }, {} as any);

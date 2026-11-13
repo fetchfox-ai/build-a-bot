@@ -2,7 +2,7 @@ import { type Tool } from '@mastra/core/tools';
 import { MCPClient } from '@mastra/mcp';
 import { firecrawlApiKey } from '../../../constants.js';
 import type { GlobalContext } from '../../../context/index.js';
-import type { Logger } from '../../../logger.js';
+import type { ILogger } from '../../../logger.js';
 import { addInstruments } from '../../instruments/index.js';
 import { firecrawlCostInstrument } from './instruments.js';
 
@@ -11,7 +11,7 @@ export const close = async (_context: GlobalContext): Promise<void> => {};
 export const createTools = async ({
   logger,
 }: {
-  logger: Logger;
+  logger: ILogger;
 }): Promise<Record<string, Tool>> => {
   const mcpClient = new MCPClient({
     id: 'firecrawl-mcp-client',

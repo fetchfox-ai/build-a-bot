@@ -5,7 +5,7 @@ import {
   type DocumentLibrary,
   type DocumentSummary,
 } from '../../../documents/index.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 import { parseResponseBody } from '../../../util/index.js';
 import { likelyAdOrTracker } from './block.js';
 
@@ -16,7 +16,7 @@ export type NetworkCaptureOptions = {
   library: DocumentLibrary;
   cursorId: string;
   proxy: string;
-  logger: Logger;
+  logger: ILogger;
 };
 
 export class NetworkCapture {
@@ -25,7 +25,7 @@ export class NetworkCapture {
   private library: DocumentLibrary;
   private cursorId: string;
   private proxy: string;
-  readonly logger: Logger;
+  readonly logger: ILogger;
   private requests = new WeakMap<Request, string>();
   private ids: string[] = [];
   private listeners = new Set<() => void>();
@@ -49,7 +49,7 @@ export class NetworkCapture {
     library: DocumentLibrary,
     cursorId: string,
     proxy: string,
-    options: { logger: Logger }
+    options: { logger: ILogger }
   ): NetworkCapture {
     let capture = captures.get(page);
     if (!capture) {

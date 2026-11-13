@@ -3,10 +3,10 @@ import { mkdir, open, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { MastraServerCache } from '@mastra/core/cache';
 import { DiskCache } from '../../../cache/DiskCache.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 
 export type DiskServerCacheOptions = {
-  logger: Logger;
+  logger: ILogger;
   keyPrefix?: string;
   lockStaleMs?: number;
   lockTimeoutMs?: number;

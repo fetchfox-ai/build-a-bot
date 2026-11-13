@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { createTools } from '../../src/mastra/tools/codeTools/tools.js';
 
 const documentLibrary = new DocumentLibrary({
-  logger: createLogger(),
+  logger: new Logger(),
 });
 const tools = createTools({ documentLibrary });
 

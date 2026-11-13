@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { parseResponseBody } from '../../src/util/index.js';
 
 describe('parseResponseBody', () => {
@@ -7,7 +7,7 @@ describe('parseResponseBody', () => {
     expect(
       JSON.parse(
         parseResponseBody('application/json+protobuf', Buffer.from([0x08, 0x96, 0x01]), {
-          logger: createLogger(),
+          logger: new Logger(),
         })
       )
     ).toEqual({
@@ -19,13 +19,13 @@ describe('parseResponseBody', () => {
   it('preserves JSON payloads sent with the protobuf media type', () => {
     expect(
       parseResponseBody('application/json+protobuf', Buffer.from('{"ok":true}'), {
-        logger: createLogger(),
+        logger: new Logger(),
       })
     ).toBe('{"ok":true}');
   });
 
   it('accepts a missing content type', () => {
-    expect(parseResponseBody(null, Buffer.from('plain text'), { logger: createLogger() })).toBe(
+    expect(parseResponseBody(null, Buffer.from('plain text'), { logger: new Logger() })).toBe(
       'plain text'
     );
   });

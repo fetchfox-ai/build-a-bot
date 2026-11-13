@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserSession } from '../../src/mastra/tools/browserTools/BrowserSession.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
 import {
@@ -27,12 +27,12 @@ describe('browser tools', () => {
   let session: BrowserSession;
 
   beforeEach(() => {
-    documentLibrary = new DocumentLibrary({ logger: createLogger() });
+    documentLibrary = new DocumentLibrary({ logger: new Logger() });
     session = new BrowserSession({
       proxyRegistry: new ProxyRegistry({
         proxies: [new NoProxy()],
       }),
-      logger: createLogger(),
+      logger: new Logger(),
     });
   });
   let site: Awaited<ReturnType<typeof startMockEcommerceSite>>;
@@ -53,7 +53,7 @@ describe('browser tools', () => {
       const backend = new MemoryCache();
       const cache = new BrowserToolCache({
         cache: backend,
-        logger: createLogger(),
+        logger: new Logger(),
       });
       const input = { cursorId: 'warm-page', url: `${site.baseUrl}/` };
       const output = { status: 200, ok: true };
@@ -71,7 +71,7 @@ describe('browser tools', () => {
     it('returns the completed prefix as replay steps on a miss', async () => {
       const cache = new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       });
       await cache.recordToolCall(
         'page',
@@ -98,11 +98,11 @@ describe('browser tools', () => {
       const backend = new MemoryCache();
       const first = new BrowserToolCache({
         cache: backend,
-        logger: createLogger(),
+        logger: new Logger(),
       });
       const second = new BrowserToolCache({
         cache: backend,
-        logger: createLogger(),
+        logger: new Logger(),
       });
       const output = '<html>cached</html>';
 
@@ -154,7 +154,7 @@ describe('browser tools', () => {
             url: `${site.baseUrl}/products/footwear-1`,
           },
           undefined,
-          { logger: createLogger() }
+          { logger: new Logger() }
         )
       ).resolves.toMatchObject({ status: 200, ok: true, readiness: { state: 'settled' } });
       const result = await executors.contentTool(documentLibrary, session, { cursorId });
@@ -193,7 +193,7 @@ describe('browser tools', () => {
           url: `${site.baseUrl}/categories/footwear?page=1`,
         },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       );
       const firstPage = await executors.contentTool(documentLibrary, session, { cursorId });
 
@@ -208,7 +208,7 @@ describe('browser tools', () => {
           url: `${site.baseUrl}/categories/footwear?page=2`,
         },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       );
       const secondPage = await executors.contentTool(documentLibrary, session, { cursorId });
       expect(documentContent(secondPage.documentId).match(/class="product-card"/g)).toHaveLength(2);
@@ -225,7 +225,7 @@ describe('browser tools', () => {
           url: `${site.baseUrl}/search?q=SNEAKERS`,
         },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       );
       const content = await executors.contentTool(documentLibrary, session, { cursorId });
 
@@ -242,7 +242,7 @@ describe('browser tools', () => {
         session,
         { cursorId, url: `${site.baseUrl}/` },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       );
 
       await expect(
@@ -272,7 +272,7 @@ describe('browser tools', () => {
         session,
         { cursorId, url: `${site.baseUrl}/` },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       );
 
       await expect(
@@ -316,7 +316,7 @@ describe('browser tools', () => {
           url: `${dynamicSite.baseUrl}/`,
         },
         undefined,
-        { logger: createLogger() }
+        { logger: new Logger() }
       );
       await executors.waitForSelectorTool(documentLibrary, session, {
         cursorId,
@@ -354,16 +354,16 @@ describe('browser tools', () => {
 
     it('uses browser tools to save a page and document tools to inspect it', async () => {
       const browserTools = await createBrowserTools({
-        logger: createLogger(),
+        logger: new Logger(),
         cache: new BrowserToolCache({
           cache: new MemoryCache(),
-          logger: createLogger(),
+          logger: new Logger(),
         }),
         documentLibrary,
         browserSession: session,
         proxyRegistry: session.proxyRegistry,
       });
-      const documentTools = await createDocumentTools({ logger: createLogger(), documentLibrary });
+      const documentTools = await createDocumentTools({ logger: new Logger(), documentLibrary });
 
       const agent = {
         inspectProduct: async () => {
@@ -407,10 +407,10 @@ describe('browser tools', () => {
     beforeEach(async () => {
       const cache = new BrowserToolCache({
         cache: new MemoryCache(),
-        logger: createLogger(),
+        logger: new Logger(),
       });
       tools = await createBrowserTools({
-        logger: createLogger(),
+        logger: new Logger(),
         cache,
         documentLibrary,
         browserSession: session,

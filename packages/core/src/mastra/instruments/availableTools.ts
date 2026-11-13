@@ -1,10 +1,10 @@
-import type { Logger } from '../../logger.js';
+import type { ILogger } from '../../logger.js';
 
 const availableTools = new Set<string>();
 
 export const markAvailableTool = async <Tool extends object>(
   tool: Tool,
-  _logger: Logger
+  _logger: ILogger
 ): Promise<Tool> => {
   if (!('id' in tool) || typeof tool.id !== 'string') {
     throw new Error('Available tools must have a string id');

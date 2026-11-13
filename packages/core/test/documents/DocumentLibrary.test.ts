@@ -10,12 +10,12 @@ import {
   type DocumentRequest,
 } from '../../src/documents/DocumentLibrary.js';
 import { MemoryLibraryBackend } from '../../src/documents/MemoryLibraryBackend.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 
 const createMemoryLibrary = () =>
   new DocumentLibrary({
-    backend: new MemoryLibraryBackend({ logger: createLogger() }),
-    logger: createLogger(),
+    backend: new MemoryLibraryBackend({ logger: new Logger() }),
+    logger: new Logger(),
   });
 
 const request = (mode: DocumentRequest['mode'] = 'fetch'): DocumentRequest => ({
@@ -242,19 +242,19 @@ describe('DocumentLibrary', () => {
       const writer = new DocumentLibrary({
         backend: new DiskLibraryBackend({
           namespace: 'documentLibrary',
-          logger: createLogger(),
+          logger: new Logger(),
           rootDir: directory,
         }),
-        logger: createLogger(),
+        logger: new Logger(),
       });
       const id = saveHtml(writer);
       const reader = new DocumentLibrary({
         backend: new DiskLibraryBackend({
           namespace: 'documentLibrary',
-          logger: createLogger(),
+          logger: new Logger(),
           rootDir: directory,
         }),
-        logger: createLogger(),
+        logger: new Logger(),
       });
 
       expect(reader.summary(id)).toEqual(writer.summary(id));

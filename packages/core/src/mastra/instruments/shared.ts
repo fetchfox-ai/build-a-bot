@@ -1,14 +1,14 @@
 import { standardSchemaToJSONSchema, type StandardSchemaWithJSON } from '@mastra/core/schema';
 import type { Tool } from '@mastra/core/tools';
 import * as z from 'zod';
-import type { Logger } from '../../logger.js';
+import type { ILogger } from '../../logger.js';
 
 export const addMetric = (
   output: unknown,
   field: string,
   val: unknown,
   tool: Tool,
-  logger: Logger,
+  logger: ILogger,
   _context: unknown
 ): Record<string, unknown> => {
   logger.info(`Add metric for ${tool.id}: ${field}=${JSON.stringify(val)}`);

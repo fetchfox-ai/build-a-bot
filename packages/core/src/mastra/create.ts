@@ -19,7 +19,7 @@ import {
   tursoDatabaseUrl,
 } from '../constants.js';
 import type { GlobalContext } from '../context/index.js';
-import type { Logger } from '../logger.js';
+import type { ILogger } from '../logger.js';
 import { formatToolCall, getOrNull, hash } from '../util/index.js';
 import { DiskServerCache } from './extensions/cache/DiskServerCache.js';
 import { ContextCompressionProcessor } from './processors/ContextCompressionProcessor.js';
@@ -35,7 +35,7 @@ export type MastraOptions = Pick<
   GlobalContext,
   'browserSession' | 'documentLibrary' | 'openRouterApiKey' | 'proxyRegistry'
 > & {
-  logger: Logger;
+  logger: ILogger;
   eventHandler: (event: TracingEvent) => void | Promise<void>;
 };
 

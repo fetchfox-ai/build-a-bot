@@ -1,10 +1,10 @@
 import { type Tool } from '@mastra/core/tools';
 import PQueue from 'p-queue';
 import * as z from 'zod';
-import type { Logger } from '../../logger.js';
+import type { ILogger } from '../../logger.js';
 import { asJSONSchema } from './shared.js';
 
-export const concurrencyInstrument = async (tool: Tool, logger: Logger): Promise<Tool> => {
+export const concurrencyInstrument = async (tool: Tool, logger: ILogger): Promise<Tool> => {
   if (
     tool.inputSchema === undefined ||
     tool.inputSchema == null ||

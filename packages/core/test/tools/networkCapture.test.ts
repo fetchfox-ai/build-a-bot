@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { chromium, type Page } from 'playwright';
 import { expect, it, vi } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/DocumentLibrary.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { likelyAdOrTracker } from '../../src/mastra/tools/browserTools/block.js';
 import { NetworkCapture } from '../../src/mastra/tools/browserTools/NetworkCapture.js';
 
@@ -28,14 +28,14 @@ it('captures delayed same-URL POSTs as separate immutable scoped documents', asy
   try {
     const page = await browser.newPage();
     const library = new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const capture = new NetworkCapture({
       page,
       library,
       cursorId: 'cursor',
       proxy: 'none',
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const id = capture.begin();
     const address = server.address() as { port: number };
@@ -58,7 +58,7 @@ it('captures delayed same-URL POSTs as separate immutable scoped documents', asy
       library,
       cursorId: 'other-cursor',
       proxy: 'none',
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const otherId = otherCapture.begin();
     await other.goto(`http://127.0.0.1:${address.port}`);
@@ -84,14 +84,14 @@ it('skips redirect bodies, catches unavailable bodies, and isolates reused curso
   const page = new EventEmitter();
   Object.assign(page, { isClosed: () => false });
   const library = new DocumentLibrary({
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const capture = new NetworkCapture({
     page: page as unknown as Page,
     library,
     cursorId: 'reused',
     proxy: 'none',
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const first = capture.begin();
   const other = new NetworkCapture({
@@ -99,7 +99,7 @@ it('skips redirect bodies, catches unavailable bodies, and isolates reused curso
     library,
     cursorId: 'reused',
     proxy: 'none',
-    logger: createLogger(),
+    logger: new Logger(),
   });
   expect(other.begin()).not.toBe(first);
   const request = { resourceType: () => 'fetch', url: () => 'https://example.test/jobs' };
@@ -141,14 +141,14 @@ it('discards a response body that fails after its page closes', async () => {
   const page = new EventEmitter();
   Object.assign(page, { isClosed: () => closed });
   const library = new DocumentLibrary({
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const capture = new NetworkCapture({
     page: page as unknown as Page,
     library,
     cursorId: 'cursor',
     proxy: 'none',
-    logger: createLogger(),
+    logger: new Logger(),
   });
   capture.begin();
   const request = { resourceType: () => 'fetch', url: () => 'https://example.test/jobs' };

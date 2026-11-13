@@ -9,7 +9,7 @@ import {
   type DocumentLibrary,
   type DocumentSummary,
 } from '../../../documents/index.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 import { isBrowserProxy, type ProxyRegistry } from '../../../proxy/index.js';
 import { getOrNull, hash } from '../../../util/index.js';
 import { addInstruments, markAvailableTool, runtimeInstrument } from '../../instruments/index.js';
@@ -186,7 +186,7 @@ const replay = async (
   session: BrowserSession,
   cursorId: string,
   steps: any[],
-  { logger }: { logger: Logger }
+  { logger }: { logger: ILogger }
 ) => {
   logger.info(`Browser cache replay: prefixLength=${steps.length}`);
   try {
@@ -248,7 +248,7 @@ export const executors: Record<string, any> = {
       contentType,
     }: z.input<typeof networkInputSchema>,
     _context: unknown = undefined,
-    { logger }: { logger: Logger }
+    { logger }: { logger: ILogger }
   ): Promise<z.infer<typeof networkOutputSchema>> => {
     const cursor = await session.getCursor(cursorId);
     const capture = NetworkCapture.for(cursor.page, documentLibrary, cursorId, cursor.proxy, {
@@ -312,7 +312,7 @@ export const executors: Record<string, any> = {
     session: BrowserSession,
     { cursorId, url }: z.input<typeof gotoInputSchema>,
     _context: unknown = undefined,
-    { logger }: { logger: Logger }
+    { logger }: { logger: ILogger }
   ): Promise<z.infer<typeof gotoOutputSchema>> => {
     const cursor = await session.getCursor(cursorId);
     const timestamp = new Date().toISOString();
@@ -422,7 +422,7 @@ const createNewPageTool = (documentLibrary: DocumentLibrary, session: BrowserSes
 const createGotoTool = (
   documentLibrary: DocumentLibrary,
   session: BrowserSession,
-  options: { logger: Logger }
+  options: { logger: ILogger }
 ): any =>
   createTool({
     id: prefix('gotoTool'),
@@ -467,7 +467,7 @@ const createClickTool = (documentLibrary: DocumentLibrary, session: BrowserSessi
   });
 
 export type CreateBrowserToolsOptions = {
-  logger: Logger;
+  logger: ILogger;
   browserSession: BrowserSession;
   cache?: BrowserToolCache;
   documentLibrary: DocumentLibrary;

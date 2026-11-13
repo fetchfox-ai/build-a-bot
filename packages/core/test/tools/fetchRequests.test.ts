@@ -1,12 +1,12 @@
 import { expect, it, vi } from 'vitest';
 import { DocumentLibrary } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { createTools, executors } from '../../src/mastra/tools/fetchTools/tools.js';
 import { NoProxy, ProxyRegistry } from '../../src/proxy/index.js';
 
 it('forwards read-only POST requests and caches bodies and headers independently', async () => {
   const library = new DocumentLibrary({
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const proxy = new NoProxy();
   const fetch = vi
@@ -15,7 +15,7 @@ it('forwards read-only POST requests and caches bodies and headers independently
       async () => new Response('{"jobs":[]}', { headers: { 'content-type': 'application/json' } })
     );
   const tools = await createTools({
-    logger: createLogger(),
+    logger: new Logger(),
     documentLibrary: library,
     proxyRegistry: new ProxyRegistry({
       proxies: [proxy],
@@ -52,21 +52,21 @@ it('rejects mutating POST and GET bodies before sending requests', async () => {
   const proxy = new NoProxy();
   const fetch = vi.spyOn(proxy, 'fetch');
   const library = new DocumentLibrary({
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const registry = new ProxyRegistry({
     proxies: [proxy],
   });
   const input = { url: 'https://example.test/search', proxy: 'none' };
   await expect(
-    executors.fetchTool(library, registry, { ...input, method: 'POST' }, { logger: createLogger() })
+    executors.fetchTool(library, registry, { ...input, method: 'POST' }, { logger: new Logger() })
   ).rejects.toThrow('read-only');
   await expect(
     executors.fetchTool(
       library,
       registry,
       { ...input, body: 'invalid' },
-      { logger: createLogger() }
+      { logger: new Logger() }
     )
   ).rejects.toThrow('GET cannot');
   expect(fetch).not.toHaveBeenCalled();
@@ -76,9 +76,9 @@ it('accepts null headers and body as omitted in generated GET calls', async () =
   const proxy = new NoProxy();
   const fetch = vi.spyOn(proxy, 'fetch').mockResolvedValue(new Response('Example'));
   const tools = await createTools({
-    logger: createLogger(),
+    logger: new Logger(),
     documentLibrary: new DocumentLibrary({
-      logger: createLogger(),
+      logger: new Logger(),
     }),
     proxyRegistry: new ProxyRegistry({
       proxies: [proxy],
@@ -115,7 +115,7 @@ it('aborts a request at its configured timeout', async () => {
   await expect(
     executors.fetchTool(
       new DocumentLibrary({
-        logger: createLogger(),
+        logger: new Logger(),
       }),
       new ProxyRegistry({
         proxies: [proxy],
@@ -125,7 +125,7 @@ it('aborts a request at its configured timeout', async () => {
         proxy: 'none',
         timeout: 20,
       },
-      { logger: createLogger() }
+      { logger: new Logger() }
     )
   ).rejects.toThrow('timeout');
 });

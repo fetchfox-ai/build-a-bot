@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, it, vi } from 'vitest';
 import { DocumentLibrary, DiskLibraryBackend } from '../../src/documents/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrowserToolCache } from '../../src/mastra/tools/browserTools/BrowserToolCache.js';
 import { createTools } from '../../src/mastra/tools/fetchTools/tools.js';
 import { NoProxy, ProxyRegistry } from '../../src/proxy/index.js';
@@ -19,20 +19,20 @@ it('isolates fetch references between stores while retaining persistent-store ca
         async () => new Response('<p>Data</p>', { headers: { 'content-type': 'text/html' } })
       );
     const a = new DocumentLibrary({
-      backend: new DiskLibraryBackend({ namespace: 'a', logger: createLogger(), rootDir: root }),
-      logger: createLogger(),
+      backend: new DiskLibraryBackend({ namespace: 'a', logger: new Logger(), rootDir: root }),
+      logger: new Logger(),
     });
     const b = new DocumentLibrary({
-      backend: new DiskLibraryBackend({ namespace: 'b', logger: createLogger(), rootDir: root }),
-      logger: createLogger(),
+      backend: new DiskLibraryBackend({ namespace: 'b', logger: new Logger(), rootDir: root }),
+      logger: new Logger(),
     });
     const again = new DocumentLibrary({
-      backend: new DiskLibraryBackend({ namespace: 'a', logger: createLogger(), rootDir: root }),
-      logger: createLogger(),
+      backend: new DiskLibraryBackend({ namespace: 'a', logger: new Logger(), rootDir: root }),
+      logger: new Logger(),
     });
     for (const library of [a, b, again]) {
       const tools = await createTools({
-        logger: createLogger(),
+        logger: new Logger(),
         documentLibrary: library,
         proxyRegistry: new ProxyRegistry({
           proxies: [proxy],
@@ -47,11 +47,11 @@ it('isolates fetch references between stores while retaining persistent-store ca
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(
       new DocumentLibrary({
-        logger: createLogger(),
+        logger: new Logger(),
       }).cacheScope
     ).not.toBe(
       new DocumentLibrary({
-        logger: createLogger(),
+        logger: new Logger(),
       }).cacheScope
     );
   } finally {
@@ -63,12 +63,12 @@ it('isolates browser sequence entries between document stores', async () => {
   const a = new BrowserToolCache({
     cache: backend,
     cacheScope: 'a',
-    logger: createLogger(),
+    logger: new Logger(),
   });
   const b = new BrowserToolCache({
     cache: backend,
     cacheScope: 'b',
-    logger: createLogger(),
+    logger: new Logger(),
   });
   await a.recordToolCall('first', 'content', {}, { documentId: 'a-only' });
   expect((await a.checkToolCall('again', 'content', {})).hit).toBe(true);

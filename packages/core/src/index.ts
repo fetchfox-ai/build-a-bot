@@ -4,7 +4,7 @@ export {
   UsesContext,
   type UsesContextOptions,
 } from './context/index.js';
-export type { Logger } from './logger.js';
+export { Logger, type ILogger } from './logger.js';
 export { Bot, type BotBuildOptions, type BotOptions } from './bots/Bot.js';
 export { BotTemplate } from './bots/BotTemplate.js';
 export { ClassSpec } from './bots/ClassSpec.js';

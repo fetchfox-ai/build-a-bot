@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import chalk from 'chalk';
 import { Reader } from 'protobufjs/minimal.js';
 import { deterministicRandom } from '../constants.js';
-import { type Logger } from '../logger.js';
+import { type ILogger } from '../logger.js';
 
 export const getOrNull = <Value>(input: unknown, key: string): Value | null => {
   if (typeof input !== 'object' || input === null || !(key in input)) {
@@ -152,7 +152,7 @@ const protobufFields = (bytes: Uint8Array): number[] => {
 export const parseResponseBody = (
   contentType: string | null | undefined,
   body: Uint8Array | ArrayBuffer,
-  { logger }: { logger: Logger }
+  { logger }: { logger: ILogger }
 ): string => {
   const bytes = body instanceof ArrayBuffer ? new Uint8Array(body) : body;
   const text = Buffer.from(bytes).toString('utf8');

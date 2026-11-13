@@ -4,7 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { Bot } from '../../src/bots/Bot.js';
 import { BotTemplate, ClassSpec, FunctionSpec } from '../../src/bots/index.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { healStep, planWorkflow } from '../../src/mastra/workflows/index.js';
 
 const createBotTemplate = (context: unknown) =>
@@ -52,7 +52,7 @@ const executeHealStep = async (outputs: unknown[]) => {
     generate.mockResolvedValueOnce({ object: output });
   }
   const context = {
-    logger: createLogger(),
+    logger: new Logger(),
     close: async () => {},
     mastra: { listTools: () => ({}) },
   };

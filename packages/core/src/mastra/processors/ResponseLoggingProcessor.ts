@@ -7,15 +7,15 @@ import {
   type ResponseCacheOptions,
 } from '@mastra/core/processors';
 import chalk from 'chalk';
-import { type Logger } from '../../logger.js';
+import { type ILogger } from '../../logger.js';
 import { formatToolCall } from '../../util/index.js';
 
-export type ResponseLoggingProcessorOptions = { logger: Logger };
+export type ResponseLoggingProcessorOptions = { logger: ILogger };
 
 export class ResponseLoggingProcessor implements Processor<'response-logging'> {
   readonly id = 'response-logging';
   readonly name = 'Response Logging';
-  readonly logger: Logger;
+  readonly logger: ILogger;
 
   constructor(options: ResponseLoggingProcessorOptions) {
     this.logger = options.logger;

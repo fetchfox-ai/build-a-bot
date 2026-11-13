@@ -2,7 +2,7 @@ import { type Tool } from '@mastra/core/tools';
 import { cb } from '../../cache/busters.js';
 import { DiskCache } from '../../cache/DiskCache.js';
 import { toolCacheInput, toolCacheSchema } from '../../cache/toolCacheKey.js';
-import type { Logger } from '../../logger.js';
+import type { ILogger } from '../../logger.js';
 import { hash } from '../../util/index.js';
 import { isToolFailure } from '../toolError.js';
 import { addMetric } from './shared.js';
@@ -11,7 +11,7 @@ type CachedToolResult = { type: 'output'; output: unknown };
 
 export const cacheInstrument = async (
   tool: Tool,
-  logger: Logger,
+  logger: ILogger,
   cacheScope = ''
 ): Promise<Tool> => {
   const execute = tool.execute;
@@ -68,7 +68,7 @@ const addCacheMetric = (
   output: unknown,
   result: 'hit' | 'miss',
   tool: Tool,
-  logger: Logger,
+  logger: ILogger,
   context: Parameters<typeof addMetric>[5]
 ): Record<string, unknown> =>
   addMetric(

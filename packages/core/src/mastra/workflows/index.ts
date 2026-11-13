@@ -4,7 +4,7 @@ import { createWorkflow, createStep } from '@mastra/core/workflows';
 import { z } from 'zod';
 import { Bot } from '../../bots/Bot.js';
 import { BotTemplate } from '../../bots/BotTemplate.js';
-import { logger } from '../../logger.js';
+import type { GlobalContext } from '../../context/index.js';
 import { errorString, indentCode } from '../../util/index.js';
 
 export const planStep = createStep({
@@ -17,7 +17,9 @@ export const planStep = createStep({
     plan: z.string(),
   }),
 
-  execute: async ({ inputData, mastra }) => {
+  execute: async ({ inputData, requestContext, mastra }) => {
+    const context = requestContext.get('globalContext') as GlobalContext;
+    const logger = context.logger;
     const prompt = `You are planning out JavaScript functions. Do not write code. Instead, generate a detailed report for how to write these functions. That report will be used by the next phase of the pipeline to write the code.
 
 ${renderBotTemplate(inputData.botTemplate)}
@@ -146,6 +148,8 @@ export const healStep = createStep({
     code: z.string(),
   }),
   execute: async ({ inputData, requestContext, mastra }) => {
+    const context = requestContext.get('globalContext') as GlobalContext;
+    const logger = context.logger;
     const agent = mastra!.getAgentById('writing-agent');
 
     const prompt = `You are evaluating out JavaScript functions. 
@@ -161,7 +165,7 @@ Use the bot_ tool(s) to test out the functions.
     let codeError: { code: string; message: string } | undefined;
     const bot = new Bot({
       name: 'heal-candidate',
-      context: requestContext.get('globalContext'),
+      context,
       template: botTemplate,
     });
     try {

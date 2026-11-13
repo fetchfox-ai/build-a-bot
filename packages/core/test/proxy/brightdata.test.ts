@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { brightdataApiKey } from '../../src/constants.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrightDataForwardProxy } from '../../src/proxy/BrightDataForwardProxy.js';
 import { CdpProxy } from '../../src/proxy/CdpProxy.js';
 import { createBrightdataProxies, removeBrightdataProxies } from '../../src/proxy/provision.js';
@@ -33,27 +33,27 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data provisioning (rea
 
   it('rejects unsafe prefixes, long zone names, and missing keys', async () => {
     for (const val of ['', ' ', '*', 'fetchfoxTest-']) {
-      await expect(removeBrightdataProxies(val, { logger: createLogger() })).rejects.toThrow(
+      await expect(removeBrightdataProxies(val, { logger: new Logger() })).rejects.toThrow(
         'prefix'
       );
       await expect(
-        createBrightdataProxies(val, ['datacenterShared'], { logger: createLogger() })
+        createBrightdataProxies(val, ['datacenterShared'], { logger: new Logger() })
       ).rejects.toThrow('prefix');
     }
     await expect(
-      removeBrightdataProxies(undefined as never, { logger: createLogger() })
+      removeBrightdataProxies(undefined as never, { logger: new Logger() })
     ).rejects.toThrow('prefix');
     await expect(
-      removeBrightdataProxies(null as never, { logger: createLogger() })
+      removeBrightdataProxies(null as never, { logger: new Logger() })
     ).rejects.toThrow('prefix');
     await expect(
-      createBrightdataProxies(prefix, [], { logger: createLogger(), apiKey: '' })
+      createBrightdataProxies(prefix, [], { logger: new Logger(), apiKey: '' })
     ).rejects.toThrow('API_KEY');
     await expect(
-      removeBrightdataProxies(prefix, { logger: createLogger(), apiKey: '' })
+      removeBrightdataProxies(prefix, { logger: new Logger(), apiKey: '' })
     ).rejects.toThrow('API_KEY');
     await expect(
-      createBrightdataProxies(prefix.repeat(6), ['datacenterShared'], { logger: createLogger() })
+      createBrightdataProxies(prefix.repeat(6), ['datacenterShared'], { logger: new Logger() })
     ).rejects.toThrow(
       /Could not provision Bright Data proxy .*Completed zones: none\..*30 characters/
     );
@@ -61,7 +61,7 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data provisioning (rea
 
   it('creates usable proxies and reuses the real zones without changing unrelated zones', async () => {
     const registry = await createBrightdataProxies(prefix, ['datacenterShared'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
     expect(registry.list().map((proxy) => proxy.id)).toEqual(ids);
     const names = ids.map((id) => (registry.require(id) as BrightDataForwardProxy).zone);
@@ -70,14 +70,14 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data provisioning (rea
     expect(await listZones()).toEqual(expected);
 
     const repeated = await createBrightdataProxies(prefix, ['datacenterShared'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
     expect(repeated.list().map((proxy) => proxy.id)).toEqual(ids);
     expect(ids.map((id) => (repeated.require(id) as BrightDataForwardProxy).zone)).toEqual(names);
     expect(await listZones()).toEqual(expected);
 
     const subset = await createBrightdataProxies(prefix, ['datacenterShared', 'datacenterShared'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
     expect(subset.list().map((proxy) => proxy.id)).toEqual(ids);
 
@@ -93,7 +93,7 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data provisioning (rea
 
   it('provisions residentialCdp explicitly and reuses its browser zone', async () => {
     const registry = await createBrightdataProxies(prefix, ['residentialCdp'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
     const id = `${prefix}-residentialCdp`;
     expect(registry.list().map((proxy) => proxy.id)).toEqual([id]);
@@ -101,7 +101,7 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('Bright Data provisioning (rea
     // Do not print the credential-bearing proxy or URL on assertion failures.
     expect(proxy instanceof CdpProxy).toBe(true);
     const repeated = await createBrightdataProxies(prefix, ['residentialCdp'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
     expect((repeated.require(id) as CdpProxy).cdpUrl === (proxy as CdpProxy).cdpUrl).toBe(true);
     const browser = await (proxy as CdpProxy).launchBrowser();

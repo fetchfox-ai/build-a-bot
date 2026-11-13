@@ -1,9 +1,9 @@
 import { type Tool } from '@mastra/core/tools';
 import * as z from 'zod';
-import type { Logger } from '../../logger.js';
+import type { ILogger } from '../../logger.js';
 import { addMetric, instrumentOutputSchema } from './shared.js';
 
-export const runtimeInstrument = async (tool: Tool, logger: Logger): Promise<Tool> => {
+export const runtimeInstrument = async (tool: Tool, logger: ILogger): Promise<Tool> => {
   if (tool.outputSchema === undefined || tool.outputSchema == null) {
     return tool;
   }

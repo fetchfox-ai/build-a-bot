@@ -10,7 +10,7 @@ import PQueue from 'p-queue';
 import { z } from 'zod';
 import type { GlobalContext } from '../context/index.js';
 import { UsesContext, type UsesContextOptions } from '../context/UsesContext.js';
-import type { Logger } from '../logger.js';
+import type { ILogger } from '../logger.js';
 import type { AnyTool } from '../types.js';
 import { getOrNull, srid, toError } from '../util/index.js';
 import { BotTemplate } from './BotTemplate.js';
@@ -65,7 +65,7 @@ type CompiledBot = {
 
 const createConsole = (
   name: string,
-  logger: Logger
+  logger: ILogger
 ): Pick<Console, 'debug' | 'error' | 'info' | 'log' | 'warn'> => {
   const write = (level: 'debug' | 'error' | 'info' | 'warn', ...vals: unknown[]): void => {
     logger[level](

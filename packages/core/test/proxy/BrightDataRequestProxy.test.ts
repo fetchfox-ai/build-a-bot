@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { brightdataApiKey } from '../../src/constants.js';
-import { createLogger } from '../../src/logger.js';
+import { Logger } from '../../src/logger.js';
 import { BrightDataForwardProxy } from '../../src/proxy/BrightDataForwardProxy.js';
 import { createBrightdataProxies } from '../../src/proxy/provision.js';
 import { expectGeoIp, geoIpUrl } from './geo.js';
@@ -10,7 +10,7 @@ describe.runIf(Boolean(brightdataApiKey?.trim()))('BrightDataForwardProxy', () =
 
   beforeAll(async () => {
     const registry = await createBrightdataProxies('fetchfox', ['datacenterShared'], {
-      logger: createLogger(),
+      logger: new Logger(),
     });
     proxy = registry.require('fetchfox-datacenterShared') as BrightDataForwardProxy;
   }, 180_000);

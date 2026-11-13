@@ -7,7 +7,7 @@ import {
   type DocumentHeaders,
   type DocumentLibrary,
 } from '../../../documents/index.js';
-import { type Logger } from '../../../logger.js';
+import { type ILogger } from '../../../logger.js';
 import { isHttpProxy, type ProxyRegistry } from '../../../proxy/index.js';
 import { parseResponseBody } from '../../../util/index.js';
 import {
@@ -79,7 +79,7 @@ export const executors: Record<string, any> = {
     documentLibrary: DocumentLibrary,
     proxyRegistry: ProxyRegistry,
     input: FetchToolInput,
-    { logger }: { logger: Logger }
+    { logger }: { logger: ILogger }
   ): Promise<FetchToolResult> => {
     const {
       url,
@@ -153,7 +153,7 @@ const createFetchTool = ({
 };
 
 export type CreateFetchToolsOptions = {
-  logger: Logger;
+  logger: ILogger;
   documentLibrary: DocumentLibrary;
   proxyRegistry: ProxyRegistry;
 };
