@@ -18,10 +18,8 @@ Build your first scraper bot:
 import { BuildABot } from '@build-a-bot/sdk';
 import { z } from 'zod';
 
-const client = new BuildABot({
-  apiKey: 'ffk_your_api_key',
-});
-
+// Get an API key from https://bab.fetchfox.ai
+const client = new BuildABot({ apiKey: 'ffk_your_api_key' });
 
 // Pick an example URL for the scraper bot.
 const url = 'https://pokemondb.net/pokedex/bulbasaur';
@@ -37,9 +35,6 @@ const bot = await client.data.bots.build({
     hp: z.number(),
     attack: z.number(),
   }),
-  fingerprintSchema: z.object({
-    number: z.string(),
-  }),
 });
 
 // The bot works on URLs similar to your example.
@@ -54,7 +49,7 @@ console.log(items[0]);
 //   fingerprint: { number: '0025' },
 //   data: { name: 'Pikachu', number: '0025', hp: 35, attack: 55 },
 //   citations: {
-//     name: { raw: '<a ...>Pikachu</a>', sourceUrl: 'https://pokemondb.net/pokedex/pikachu' },
+//     name: { raw: '<a ...>Pikachu</a>', sourceUrl: 'https://...' },
 //     // Citations for number, hp, and attack follow the same shape.
 //   },
 // }
