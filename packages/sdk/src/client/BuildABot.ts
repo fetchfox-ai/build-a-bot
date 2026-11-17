@@ -1,25 +1,20 @@
-import * as core from '@build-a-bot/core';
+import type { BuildOptions, Logger } from '../bots/types.js';
 import { defaultHost } from '../constants.js';
-import { DataBot, type DataBotOptions } from '../data/bots/DataBot.js';
+import { DataBot, type DataBotBuildResponse, type DataBotOptions } from '../data/bots/DataBot.js';
 import { User } from '../user/User.js';
 import { APIError } from './APIError.js';
 import type { UsesClient } from './UsesClient.js';
+import type { BuildStreamMessage } from './connectBuildStream.js';
 
 export type BuildABotOptions = {
   apiKey: string;
   host?: string;
-  logger?: core.ILogger;
+  basePath?: string;
+  logger?: Logger;
+  connectMasterStream?: boolean;
 };
 
 type DataBotsOptions = UsesClient;
-
-type StreamMessage = {
-  streamId?: string;
-  status?: string;
-  type?: string;
-  event?: Record<string, any>;
-  error?: { message?: string };
-};
 
 const elapsed = (event: Record<string, any>): string => {
   const start = Date.parse(String(event.startTime));
@@ -29,6 +24,14 @@ const elapsed = (event: Record<string, any>): string => {
   return milliseconds < 1_000 ? ` (${milliseconds}ms)` : ` (${(milliseconds / 1_000).toFixed(1)}s)`;
 };
 
+const normalizeBasePath = (basePath = ''): string => {
+  if (basePath === '') return '';
+  if (!basePath.startsWith('/') || basePath.startsWith('//') || basePath.includes('..')) {
+    throw new Error('Expected basePath to be an absolute, relative path.');
+  }
+  return basePath.replace(/\/+$/, '');
+};
+
 class DataBots {
   readonly client: UsesClient['client'];
 
@@ -36,37 +39,39 @@ class DataBots {
     this.client = options.client;
   }
 
-  async build(options: Omit<DataBotOptions, 'client'> & core.BotBuildOptions): Promise<DataBot> {
-    const bot = new DataBot({ ...options, client: this.client });
-    // TODO: handle onBuild... events
-    await bot.build({ forceRebuild: options?.forceRebuild });
-    return bot;
+  async build(options: Omit<DataBotOptions, 'client'> & BuildOptions): Promise<DataBotBuildResponse> {
+    return new DataBot({ ...options, client: this.client }).build({ forceRebuild: options.forceRebuild });
   }
 }
 
 export class BuildABot {
   readonly apiKey: string;
   readonly host: string;
-  readonly logger: core.ILogger;
-  readonly ws: WebSocket;
+  readonly basePath: string;
+  readonly logger: Logger;
+  readonly ws?: WebSocket;
   readonly data: { bots: DataBots };
   #user?: Promise<User>;
 
   constructor(options: BuildABotOptions) {
     this.apiKey = options.apiKey;
     this.host = options.host ?? defaultHost;
-    this.logger = options.logger ?? new core.Logger();
-    const wsUrl = new URL('/streams', this.host);
+    this.basePath = normalizeBasePath(options.basePath);
+    this.logger = options.logger ?? console;
+    const wsUrl = new URL(`${this.basePath}/streams`, this.host);
     wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
-    this.ws = new WebSocket(wsUrl);
-    this.ws.addEventListener('open', () => {
-      this.ws.send(JSON.stringify({ apiKey: this.apiKey }));
-      this.logger.info('Build stream connected');
-    });
-    this.ws.addEventListener('message', (event) => {
-      this.#logStreamMessage(event.data);
-    });
+    if (options.connectMasterStream !== false) {
+      const ws = new WebSocket(wsUrl);
+      this.ws = ws;
+      ws.addEventListener('open', () => {
+        ws.send(JSON.stringify({ apiKey: this.apiKey }));
+        this.logger.info('Build stream connected');
+      });
+      ws.addEventListener('message', (event) => {
+        this.#logStreamMessage(event.data);
+      });
+    }
     this.data = { bots: new DataBots({ client: this }) };
   }
 
@@ -74,7 +79,7 @@ export class BuildABot {
     if (!route.startsWith('/') || route.startsWith('//') || route.includes('..')) {
       throw new Error('Expected a path relative to the API.');
     }
-    const url = new URL(route, this.host);
+    const url = new URL(`${this.basePath}${route}`, this.host);
     const headers: Record<string, string> = {
       Accept: 'application/json',
       Authorization: `Bearer ${this.apiKey}`,
@@ -109,9 +114,9 @@ export class BuildABot {
   }
 
   #logStreamMessage(data: unknown): void {
-    let message: StreamMessage;
+    let message: BuildStreamMessage;
     try {
-      message = JSON.parse(String(data));
+      message = JSON.parse(String(data)) as BuildStreamMessage;
     } catch {
       return;
     }

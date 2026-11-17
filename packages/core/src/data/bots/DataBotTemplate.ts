@@ -23,6 +23,9 @@ export class DataBotTemplate extends BotTemplate {
       source instanceof DataSource ? source : new DataSource(source)
     );
     const itemSchema = options.itemSchema;
+    if (itemSchema instanceof z.ZodArray) {
+      throw new Error('itemSchema must describe one item and cannot be a top-level array');
+    }
     const fingerprintSchema =
       options.fingerprintSchema ??
       z

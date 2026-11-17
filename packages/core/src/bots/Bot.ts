@@ -41,6 +41,7 @@ type BaseBuildEvent<T extends string> = {
   error?: BuildEventError;
   startTime?: Date;
   endTime?: Date;
+  durationMs?: number;
 };
 
 export type ToolBuildEvent = BaseBuildEvent<'toolCallStarted' | 'toolCallCompleted'> & {
@@ -48,7 +49,9 @@ export type ToolBuildEvent = BaseBuildEvent<'toolCallStarted' | 'toolCallComplet
   toolDescription?: string;
 };
 
-export type InferenceBuildEvent = BaseBuildEvent<'inferenceStarted' | 'inferenceCompleted'>;
+export type InferenceBuildEvent = BaseBuildEvent<'inferenceStarted' | 'inferenceCompleted'> & {
+  inferenceId: string;
+};
 
 export type BotBuildOptions = {
   forceRebuild?: boolean;
@@ -200,11 +203,17 @@ export class Bot extends UsesContext {
           }
 
           const base = {
-            type,
             input: event.exportedSpan?.input,
             output: event.exportedSpan?.output,
             startTime: event.exportedSpan?.startTime,
             endTime: event.exportedSpan?.endTime,
+            durationMs:
+              event.exportedSpan?.startTime && event.exportedSpan?.endTime
+                ? Math.max(
+                    0,
+                    event.exportedSpan.endTime.getTime() - event.exportedSpan.startTime.getTime()
+                  )
+                : undefined,
             error: event.exportedSpan?.errorInfo
               ? {
                   name: event.exportedSpan.errorInfo.name,
@@ -216,11 +225,22 @@ export class Bot extends UsesContext {
           if (spanType === 'tool_call') {
             options.onBuildProgress({
               ...base,
+              type:
+                event.type === TracingEventType.SPAN_STARTED
+                  ? 'toolCallStarted'
+                  : 'toolCallCompleted',
               toolName: event.exportedSpan?.entityName,
               toolDescription: (event.exportedSpan?.attributes as any)?.toolDescription,
             });
           } else {
-            options.onBuildProgress(base);
+            options.onBuildProgress({
+              ...base,
+              type:
+                event.type === TracingEventType.SPAN_STARTED
+                  ? 'inferenceStarted'
+                  : 'inferenceCompleted',
+              inferenceId: event.exportedSpan.id,
+            });
           }
         };
 

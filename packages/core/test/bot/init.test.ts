@@ -281,7 +281,18 @@ it('forwards only progress from its own workflow trace and reports lifecycle cal
         for (const phase of ['span_started', 'span_updated', 'span_ended']) {
           context.emit('trace', {
             type: phase,
-            exportedSpan: { traceId, type, input: { traceId }, output: 'result', entityName: 'tool' },
+            exportedSpan: {
+              id: `${traceId}-${type}`,
+              traceId,
+              type,
+              input: { traceId },
+              output: 'result',
+              entityName: 'tool',
+              startTime: new Date('2026-11-16T23:00:00.000Z'),
+              ...(phase === 'span_ended'
+                ? { endTime: new Date('2026-11-16T23:00:01.234Z') }
+                : {}),
+            },
           });
         }
       }
@@ -302,6 +313,13 @@ it('forwards only progress from its own workflow trace and reports lifecycle cal
   expect(
     onBuildProgress.mock.calls.every(([event]) => event.input.traceId !== 'another-build')
   ).toBe(true);
+  const inferenceEvents = onBuildProgress.mock.calls
+    .map(([event]) => event)
+    .filter((event) => event.type.startsWith('inference'));
+  expect(inferenceEvents.map(({ type }) => type)).toEqual(['inferenceStarted', 'inferenceCompleted']);
+  expect(inferenceEvents[0].inferenceId).toBe(inferenceEvents[1].inferenceId);
+  expect(inferenceEvents[0].inferenceId).toMatch(/model_inference$/);
+  expect(inferenceEvents.map(({ durationMs }) => durationMs)).toEqual([undefined, 1234]);
   expect(onBuildComplete).toHaveBeenCalledOnce();
   expect(onBuildFinally).toHaveBeenCalledWith(undefined);
   expect(context.emitter.listenerCount('trace')).toBe(0);

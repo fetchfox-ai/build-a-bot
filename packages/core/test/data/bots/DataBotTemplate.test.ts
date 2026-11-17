@@ -25,6 +25,16 @@ it('accepts source instances and URL options when creating a data bot', () => {
   ).toThrow('Invalid URL: invalid-url');
 });
 
+it('rejects a top-level array item schema', () => {
+  expect(
+    () =>
+      new DataBotTemplate({
+        sources: [],
+        itemSchema: z.array(z.object({ name: z.string() })),
+      })
+  ).toThrow('itemSchema must describe one item and cannot be a top-level array');
+});
+
 it('groups extraction and fingerprint functions into class specifications', () => {
   const template = new DataBotTemplate({
     sources: [],

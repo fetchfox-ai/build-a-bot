@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { BotTemplate } from '@build-a-bot/core';
+import type { BotTemplate } from './types.js';
 
 export const serializeBotTemplate = (template: BotTemplate): object => ({
   classSpecs: template.classSpecs.map((classSpec) => {

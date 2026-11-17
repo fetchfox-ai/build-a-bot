@@ -1,25 +1,23 @@
-import type * as core from '@build-a-bot/core';
+import type { BotTemplate, BuildOptions } from './types.js';
 import { APIError } from '../client/APIError.js';
 import type { UsesClient } from '../client/UsesClient.js';
 import { serializeBotTemplate } from './serialize.js';
 
-export type BotOptions = Omit<core.BotOptions, 'context'> & UsesClient;
+export type BotOptions = UsesClient & { name: string; template: BotTemplate; code?: string };
 
 type BotResponse = {
   name: string;
-  status: core.Bot['status'];
+  status: 'idle' | 'building';
   code: string;
   username: string;
 };
 
 export class Bot {
   readonly client: UsesClient['client'];
-  name: core.Bot['name'];
-  status: core.Bot['status'];
-  template: core.Bot['template'];
-  code: core.Bot['code'];
-  script: core.Bot['script'];
-  functions: core.Bot['functions'];
+  name: string;
+  status: BotResponse['status'];
+  template: BotTemplate;
+  code?: string;
 
   constructor(options: BotOptions) {
     this.client = options.client;
@@ -27,11 +25,9 @@ export class Bot {
     this.status = 'idle';
     this.template = options.template;
     this.code = options.code;
-    this.script = undefined;
-    this.functions = {};
   }
 
-  async build(options: core.BotBuildOptions = {}): Promise<void> {
+  async build(options: BuildOptions = {}): Promise<void> {
     await this.#upsert();
     const route = await this.#route();
     let current = await this.client.call<BotResponse>('POST', await this.#route('/build'), options);
